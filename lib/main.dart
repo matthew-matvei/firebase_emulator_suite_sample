@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(const TodoListApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class TodoListApp extends StatelessWidget {
+  const TodoListApp({super.key});
 
   @override
   Widget build(BuildContext context) {
