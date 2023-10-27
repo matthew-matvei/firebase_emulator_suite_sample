@@ -14,8 +14,10 @@ class _TodoListApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Todos"),
         ),
-        body: const Center(
-          child: Text('Hello World!'),
+        body: Center(
+          child: ListView(
+            key: const ValueKey<String>("TodoList"),
+          ),
         ),
       ),
     );

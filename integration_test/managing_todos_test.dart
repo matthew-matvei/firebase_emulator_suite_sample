@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:firebase_emulator_suite_sample/main.dart' as app;
 
@@ -7,5 +8,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text("Todos"), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>("TodoList")), findsOneWidget);
   });
 }
