@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const TodoListApp());
+  runApp(const _TodoListApp());
 }
 
-class TodoListApp extends StatelessWidget {
-  const TodoListApp({super.key});
+class _TodoListApp extends StatelessWidget {
+  const _TodoListApp();
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       home: Scaffold(
-        body: Center(
+        appBar: AppBar(
+          title: const Text("Todos"),
+        ),
+        body: const Center(
           child: Text('Hello World!'),
         ),
       ),
