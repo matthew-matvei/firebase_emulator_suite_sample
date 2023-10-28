@@ -13,8 +13,9 @@ class _TodoListApp extends StatefulWidget {
 
 class _TodoListAppState extends State<_TodoListApp> {
   var _creatingNewTodo = false;
-  final _todoListItems = <String>[];
+  var _todoListItems = <String>[];
   String? _todoListItemBeingEdited;
+  final _selectedTodoListItems = <String>{};
 
   @override
   Widget build(BuildContext context) {
@@ -24,45 +25,88 @@ class _TodoListAppState extends State<_TodoListApp> {
           title: const Text("Todos"),
         ),
         body: Center(
-          child: ListView(
-            key: const ValueKey<String>("TodoList"),
+          child: Column(
             children: [
-              if (_creatingNewTodo)
-                TextField(
-                  key: AppKeys.newTodoText,
-                  autofocus: true,
-                  onSubmitted: (newTodoText) {
-                    setState(() {
-                      _todoListItems.add(newTodoText);
-                      _creatingNewTodo = false;
-                    });
-                  },
+              ButtonBar(
+                children: [
+                  IconButton(
+                      key: AppKeys.bulkDelete,
+                      onPressed: () {
+                        setState(() {
+                          _todoListItems = _todoListItems
+                              .where((element) =>
+                                  !_selectedTodoListItems.contains(element))
+                              .toList();
+                          _selectedTodoListItems.clear();
+                        });
+                      },
+                      icon: const Icon(Icons.delete))
+                ],
+              ),
+              Expanded(
+                child: ListView(
+                  key: const ValueKey<String>("TodoList"),
+                  children: [
+                    if (_creatingNewTodo)
+                      TextField(
+                        key: AppKeys.newTodoText,
+                        autofocus: true,
+                        onSubmitted: (newTodoText) {
+                          setState(() {
+                            _todoListItems.add(newTodoText);
+                            _creatingNewTodo = false;
+                          });
+                        },
+                      ),
+                    if (!_creatingNewTodo)
+                      ElevatedButton.icon(
+                          key: AppKeys.createNewTodo,
+                          onPressed: () {
+                            setState(() {
+                              _creatingNewTodo = true;
+                            });
+                          },
+                          icon: const Icon(Icons.add),
+                          label: const Text("Create new todo item")),
+                    ..._todoListItems.asMap().entries.map((entry) => Row(
+                          children: [
+                            Checkbox(
+                                value: _selectedTodoListItems
+                                    .contains(entry.value),
+                                onChanged: (selected) {
+                                  setState(() {
+                                    if (selected ?? false) {
+                                      _selectedTodoListItems.add(entry.value);
+                                    } else {
+                                      _selectedTodoListItems
+                                          .remove(entry.value);
+                                    }
+                                  });
+                                }),
+                            Expanded(
+                              child: TextField(
+                                readOnly:
+                                    _todoListItemBeingEdited != entry.value,
+                                onTap: () {
+                                  setState(() {
+                                    _todoListItemBeingEdited = entry.value;
+                                  });
+                                },
+                                onSubmitted: (newTodoListItem) {
+                                  setState(() {
+                                    _todoListItems[entry.key] = newTodoListItem;
+                                    _todoListItemBeingEdited = null;
+                                  });
+                                },
+                                controller:
+                                    TextEditingController(text: entry.value),
+                              ),
+                            ),
+                          ],
+                        ))
+                  ],
                 ),
-              if (!_creatingNewTodo)
-                ElevatedButton.icon(
-                    key: AppKeys.createNewTodo,
-                    onPressed: () {
-                      setState(() {
-                        _creatingNewTodo = true;
-                      });
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text("Create new todo item")),
-              ..._todoListItems.asMap().entries.map((entry) => TextField(
-                    readOnly: _todoListItemBeingEdited != entry.value,
-                    onTap: () {
-                      setState(() {
-                        _todoListItemBeingEdited = entry.value;
-                      });
-                    },
-                    onSubmitted: (newTodoListItem) {
-                      setState(() {
-                        _todoListItems[entry.key] = newTodoListItem;
-                        _todoListItemBeingEdited = null;
-                      });
-                    },
-                    controller: TextEditingController(text: entry.value),
-                  ))
+              ),
             ],
           ),
         ),
@@ -72,7 +116,9 @@ class _TodoListAppState extends State<_TodoListApp> {
 }
 
 class AppKeys {
+  // TODO: make these LabeledGlobalKeys
   static Key todoList = const ValueKey<String>("TodoList");
   static Key createNewTodo = const ValueKey<String>("CreateNewTodo");
   static Key newTodoText = const ValueKey<String>("NewTodoText");
+  static Key bulkDelete = const ValueKey<String>("BulkDelete");
 }

@@ -1,4 +1,5 @@
 import 'package:firebase_emulator_suite_sample/main.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:firebase_emulator_suite_sample/main.dart' as app hide AppKeys;
 
@@ -53,6 +54,24 @@ void main() {
       reason: "because the todo list item's name should have now been updated",
     );
   });
+
+  testWidgets("The user can delete multiple todo list items", (tester) async {
+    await tester.runApp();
+
+    const firstTodoListItem = "First to be deleted";
+    const safeTodoListItem = "Item that won't be deleted";
+    const secondTodoListItem = "Second to be deleted";
+
+    await tester.createTodoListItem(firstTodoListItem);
+    await tester.createTodoListItem(safeTodoListItem);
+    await tester.createTodoListItem(secondTodoListItem);
+
+    await tester.deleteTodoListItems([firstTodoListItem, secondTodoListItem]);
+
+    expect(find.text(firstTodoListItem), findsNothing);
+    expect(find.text(safeTodoListItem), findsOneWidget);
+    expect(find.text(secondTodoListItem), findsNothing);
+  });
 }
 
 extension _TestRunner on WidgetTester {
@@ -74,6 +93,20 @@ extension _TestRunner on WidgetTester {
     await pumpAndSettle();
     await enterText(find.text(initialName), newName);
     await testTextInput.receiveAction(TextInputAction.done);
+    await pumpAndSettle();
+  }
+
+  Future<void> deleteTodoListItems(List<String> todoListItems) async {
+    for (final todoListItem in todoListItems) {
+      final row = find.ancestor(
+          of: find.text(todoListItem), matching: find.byType(Row));
+      final checkbox =
+          find.descendant(of: row, matching: find.byType(Checkbox));
+      await tap(checkbox);
+      await pumpAndSettle();
+    }
+
+    await tap(find.byKey(AppKeys.bulkDelete));
     await pumpAndSettle();
   }
 }
