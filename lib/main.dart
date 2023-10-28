@@ -32,7 +32,7 @@ class _TodoListAppState extends State<_TodoListApp> {
               ),
               Expanded(
                 child: ListView(
-                  key: const ValueKey<String>("TodoList"),
+                  key: AppKeys.todoList,
                   children: [
                     if (_creatingNewTodo) _newTodoText(),
                     if (!_creatingNewTodo) _createNewTodoButton(),
@@ -131,9 +131,8 @@ class _TodoListAppState extends State<_TodoListApp> {
 }
 
 class AppKeys {
-  // TODO: make these LabeledGlobalKeys
-  static Key todoList = const ValueKey<String>("TodoList");
-  static Key createNewTodo = const ValueKey<String>("CreateNewTodo");
-  static Key newTodoText = const ValueKey<String>("NewTodoText");
-  static Key bulkDelete = const ValueKey<String>("BulkDelete");
+  static Key todoList = LabeledGlobalKey("TodoList");
+  static Key createNewTodo = LabeledGlobalKey("CreateNewTodo");
+  static Key newTodoText = LabeledGlobalKey("NewTodoText");
+  static Key bulkDelete = LabeledGlobalKey("BulkDelete");
 }
