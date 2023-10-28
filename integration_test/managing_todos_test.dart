@@ -21,6 +21,38 @@ void main() {
     expect(find.text("Another todo item"), findsOneWidget);
     expect(find.text("I'm getting bored now"), findsOneWidget);
   });
+
+  testWidgets("The user can rename todo list items", (tester) async {
+    await tester.runApp();
+
+    const initialTodoName = "Initial todo item name";
+    const newTodoName = "New todo item name";
+    await tester.createTodoListItem(initialTodoName);
+
+    expect(
+      find.text(initialTodoName),
+      findsOneWidget,
+      reason: "because the todo list item's name should not yet been updated",
+    );
+    expect(
+      find.text(newTodoName),
+      findsNothing,
+      reason: "because the todo list item's name should not yet been updated",
+    );
+
+    await tester.updateTodoListItem(initialTodoName, newTodoName);
+
+    expect(
+      find.text(initialTodoName),
+      findsNothing,
+      reason: "because the todo list item's name should have now been updated",
+    );
+    expect(
+      find.text(newTodoName),
+      findsOneWidget,
+      reason: "because the todo list item's name should have now been updated",
+    );
+  });
 }
 
 extension _TestRunner on WidgetTester {
@@ -33,6 +65,14 @@ extension _TestRunner on WidgetTester {
     await tap(find.byKey(AppKeys.createNewTodo));
     await pumpAndSettle();
     await enterText(find.byKey(AppKeys.newTodoText), name);
+    await testTextInput.receiveAction(TextInputAction.done);
+    await pumpAndSettle();
+  }
+
+  Future<void> updateTodoListItem(String initialName, String newName) async {
+    await tap(find.text(initialName));
+    await pumpAndSettle();
+    await enterText(find.text(initialName), newName);
     await testTextInput.receiveAction(TextInputAction.done);
     await pumpAndSettle();
   }

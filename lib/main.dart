@@ -14,6 +14,7 @@ class _TodoListApp extends StatefulWidget {
 class _TodoListAppState extends State<_TodoListApp> {
   var _creatingNewTodo = false;
   final _todoListItems = <String>[];
+  String? _todoListItemBeingEdited;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,21 @@ class _TodoListAppState extends State<_TodoListApp> {
                     },
                     icon: const Icon(Icons.add),
                     label: const Text("Create new todo item")),
-              ..._todoListItems.map((todoListItem) => Text(todoListItem))
+              ..._todoListItems.asMap().entries.map((entry) => TextField(
+                    readOnly: _todoListItemBeingEdited != entry.value,
+                    onTap: () {
+                      setState(() {
+                        _todoListItemBeingEdited = entry.value;
+                      });
+                    },
+                    onSubmitted: (newTodoListItem) {
+                      setState(() {
+                        _todoListItems[entry.key] = newTodoListItem;
+                        _todoListItemBeingEdited = null;
+                      });
+                    },
+                    controller: TextEditingController(text: entry.value),
+                  ))
             ],
           ),
         ),
