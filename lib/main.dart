@@ -158,6 +158,7 @@ class _TodoListAppState extends State<_TodoListApp> {
                 todoListItem.completed = true;
               }
             }
+            _selectedTodoListItems.clear();
           });
         },
         icon: const Icon(Icons.done));
