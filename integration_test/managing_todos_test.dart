@@ -1,11 +1,13 @@
 import 'package:firebase_emulator_suite_sample/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:firebase_emulator_suite_sample/main.dart' as app hide AppKeys;
+
+import 'test_runner_extensions.dart';
 
 void main() {
   testWidgets("The user sees a list of todo items", (tester) async {
     await tester.runApp();
+    await tester.login();
 
     expect(find.text("Todos"), findsOneWidget);
     expect(find.byKey(AppKeys.todoList), findsOneWidget);
@@ -13,6 +15,7 @@ void main() {
 
   testWidgets("The user can create new todo list items", (tester) async {
     await tester.runApp();
+    await tester.login();
 
     await tester.createTodoListItem("My todo item");
     await tester.createTodoListItem("Another todo item");
@@ -25,6 +28,7 @@ void main() {
 
   testWidgets("The user can rename todo list items", (tester) async {
     await tester.runApp();
+    await tester.login();
 
     const initialTodoName = "Initial todo item name";
     const newTodoName = "New todo item name";
@@ -57,6 +61,7 @@ void main() {
 
   testWidgets("The user can delete multiple todo list items", (tester) async {
     await tester.runApp();
+    await tester.login();
 
     const firstTodoListItem = "First to be deleted";
     const safeTodoListItem = "Item that won't be deleted";
@@ -75,6 +80,7 @@ void main() {
 
   testWidgets("The user can mark todo list items complete", (tester) async {
     await tester.runApp();
+    await tester.login();
 
     const firstTodoListItem = "First to be completed";
     const incompleteTodoListItem = "Item that won't be completed";
@@ -114,51 +120,3 @@ Finder _todoListItemHasStrikethroughApplied(String todoListItem) =>
         matching: find.byWidgetPredicate((widget) =>
             widget is TextField &&
             widget.style?.decoration == TextDecoration.lineThrough));
-
-extension _TestRunner on WidgetTester {
-  Future<void> runApp() async {
-    app.main();
-    await pumpAndSettle();
-  }
-
-  Future<void> createTodoListItem(String name) async {
-    await tap(find.byKey(AppKeys.createNewTodo));
-    await pumpAndSettle();
-    await enterText(find.byKey(AppKeys.newTodoText), name);
-    await testTextInput.receiveAction(TextInputAction.done);
-    await pumpAndSettle();
-  }
-
-  Future<void> updateTodoListItem(String initialName, String newName) async {
-    await tap(find.text(initialName));
-    await pumpAndSettle();
-    await enterText(find.text(initialName), newName);
-    await testTextInput.receiveAction(TextInputAction.done);
-    await pumpAndSettle();
-  }
-
-  Future<void> deleteTodoListItems(List<String> todoListItems) async {
-    await _selectTodoListItems(todoListItems);
-
-    await tap(find.byKey(AppKeys.bulkDelete));
-    await pumpAndSettle();
-  }
-
-  Future<void> completeTodoListItems(List<String> todoListItems) async {
-    await _selectTodoListItems(todoListItems);
-
-    await tap(find.byKey(AppKeys.bulkComplete));
-    await pumpAndSettle();
-  }
-
-  Future<void> _selectTodoListItems(List<String> todoListItems) async {
-    for (final todoListItem in todoListItems) {
-      final row = find.ancestor(
-          of: find.text(todoListItem), matching: find.byType(Row));
-      final checkbox =
-          find.descendant(of: row, matching: find.byType(Checkbox));
-      await tap(checkbox);
-      await pumpAndSettle();
-    }
-  }
-}
