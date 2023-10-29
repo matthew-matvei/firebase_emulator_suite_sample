@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 extension TestRunner on WidgetTester {
   Future<void> runApp() async {
-    app.main();
+    await app.main();
     await pumpAndSettle();
   }
 
