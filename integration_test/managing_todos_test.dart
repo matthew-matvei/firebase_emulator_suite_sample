@@ -127,20 +127,20 @@ extension _TestRunner on WidgetTester {
   }
 
   Future<void> deleteTodoListItems(List<String> todoListItems) async {
-    for (final todoListItem in todoListItems) {
-      final row = find.ancestor(
-          of: find.text(todoListItem), matching: find.byType(Row));
-      final checkbox =
-          find.descendant(of: row, matching: find.byType(Checkbox));
-      await tap(checkbox);
-      await pumpAndSettle();
-    }
+    await _selectTodoListItems(todoListItems);
 
     await tap(find.byKey(AppKeys.bulkDelete));
     await pumpAndSettle();
   }
 
   Future<void> completeTodoListItems(List<String> todoListItems) async {
+    await _selectTodoListItems(todoListItems);
+
+    await tap(find.byKey(AppKeys.bulkComplete));
+    await pumpAndSettle();
+  }
+
+  Future<void> _selectTodoListItems(List<String> todoListItems) async {
     for (final todoListItem in todoListItems) {
       final row = find.ancestor(
           of: find.text(todoListItem), matching: find.byType(Row));
@@ -149,8 +149,5 @@ extension _TestRunner on WidgetTester {
       await tap(checkbox);
       await pumpAndSettle();
     }
-
-    await tap(find.byKey(AppKeys.bulkComplete));
-    await pumpAndSettle();
   }
 }
