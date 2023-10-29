@@ -17,37 +17,49 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Log in")),
-      body: Center(
-          child: Form(
-              child: Column(
-        children: [
-          TextFormField(
-            key: AppKeys.userNameText,
-            controller: _userNameController,
-          ),
-          TextFormField(
-            key: AppKeys.passwordText,
-            controller: _passwordController,
-          ),
-          ElevatedButton(
-            key: AppKeys.login,
-            onPressed: () {
-              if (_validCredentials().contains(
-                  (_userNameController.text, _passwordController.text))) {
-                Navigator.of(context).pushNamed(Routes.todos);
-                return;
-              }
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+            child: Form(
+                child: Column(
+          children: [
+            TextFormField(
+              key: AppKeys.userNameText,
+              decoration: const InputDecoration(label: Text("Username:")),
+              controller: _userNameController,
+            ),
+            TextFormField(
+              key: AppKeys.passwordText,
+              decoration: const InputDecoration(label: Text("Password")),
+              obscureText: true,
+              controller: _passwordController,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                key: AppKeys.login,
+                onPressed: () {
+                  if (_validCredentials().contains(
+                      (_userNameController.text, _passwordController.text))) {
+                    Navigator.of(context).pushNamed(Routes.todos);
+                    return;
+                  }
 
-              setState(() {
-                _invalidCredentialsReceived = true;
-              });
-            },
-            child: const Text("Submit"),
-          ),
-          if (_invalidCredentialsReceived)
-            const Text("Invalid username or password")
-        ],
-      ))),
+                  setState(() {
+                    _invalidCredentialsReceived = true;
+                  });
+                },
+                child: const Text("Submit"),
+              ),
+            ),
+            if (_invalidCredentialsReceived)
+              const Text(
+                "Invalid username or password",
+                style: TextStyle(color: Colors.red),
+              )
+          ],
+        ))),
+      ),
     );
   }
 }
