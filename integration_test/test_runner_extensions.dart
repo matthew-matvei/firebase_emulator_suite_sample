@@ -10,7 +10,7 @@ extension TestRunner on WidgetTester {
   }
 
   Future<void> login({String? userName, String? password}) async {
-    const validUserName = "admin";
+    const validUserName = "admin@fake.com";
     const validPassword = "Guest1!";
 
     await enterText(

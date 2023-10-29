@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_emulator_suite_sample/main.dart';
 import 'package:flutter/material.dart';
 
@@ -38,16 +39,22 @@ class _LoginState extends State<Login> {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 key: AppKeys.login,
-                onPressed: () {
-                  if (_validCredentials().contains(
-                      (_userNameController.text, _passwordController.text))) {
-                    Navigator.of(context).pushReplacementNamed(Routes.todos);
-                    return;
-                  }
+                onPressed: () async {
+                  try {
+                    await FirebaseAuth.instance.signInWithEmailAndPassword(
+                        email: _userNameController.text,
+                        password: _passwordController.text);
 
-                  setState(() {
-                    _invalidCredentialsReceived = true;
-                  });
+                    if (!context.mounted) {
+                      return;
+                    }
+
+                    Navigator.of(context).pushReplacementNamed(Routes.todos);
+                  } on FirebaseAuthException {
+                    setState(() {
+                      _invalidCredentialsReceived = true;
+                    });
+                  }
                 },
                 child: const Text("Submit"),
               ),

@@ -24,6 +24,7 @@ void main() {
     await tester.runApp();
     await tester.login();
 
+    expect(find.text("Invalid username or password"), findsNothing);
     expect(find.text("Log in"), findsNothing);
     expect(find.text("Todos"), findsOneWidget);
   });
