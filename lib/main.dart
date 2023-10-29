@@ -50,6 +50,7 @@ class _TodoListAppState extends State<_TodoListApp> {
                   ],
                 ),
               ),
+              if (completedTodoListItems.isNotEmpty) const Text("Completed"),
               Expanded(
                 child: ListView(
                   key: AppKeys.completedTodoList,

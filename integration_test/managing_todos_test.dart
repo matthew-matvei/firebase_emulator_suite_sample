@@ -84,8 +84,12 @@ void main() {
     await tester.createTodoListItem(incompleteTodoListItem);
     await tester.createTodoListItem(secondTodoListItem);
 
+    final completedTitle = find.text("Completed");
+    expect(completedTitle, findsNothing);
+
     await tester.completeTodoListItems([firstTodoListItem, secondTodoListItem]);
 
+    expect(completedTitle, findsOneWidget);
     final completed = find.byKey(AppKeys.completedTodoList);
     expect(completed, findsOneWidget);
     expect(
