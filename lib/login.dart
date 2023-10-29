@@ -41,7 +41,7 @@ class _LoginState extends State<Login> {
                 onPressed: () {
                   if (_validCredentials().contains(
                       (_userNameController.text, _passwordController.text))) {
-                    Navigator.of(context).pushNamed(Routes.todos);
+                    Navigator.of(context).pushReplacementNamed(Routes.todos);
                     return;
                   }
 
