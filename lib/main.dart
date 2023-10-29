@@ -47,20 +47,20 @@ class _TodoListAppState extends State<_TodoListApp> {
                         .entries
                         .map(_toTodoListItemRow)
                         .toList(),
+                    if (completedTodoListItems.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                        child: Text("Completed"),
+                      ),
+                      ...completedTodoListItems
+                          .asMap()
+                          .entries
+                          .map(_toTodoListItemRow)
+                          .toList(),
+                    ],
                   ],
                 ),
               ),
-              if (completedTodoListItems.isNotEmpty) const Text("Completed"),
-              Expanded(
-                child: ListView(
-                  key: AppKeys.completedTodoList,
-                  children: completedTodoListItems
-                      .asMap()
-                      .entries
-                      .map(_toTodoListItemRow)
-                      .toList(),
-                ),
-              )
             ],
           ),
         ),
@@ -80,6 +80,10 @@ class _TodoListAppState extends State<_TodoListApp> {
   TextField _todoListItem(MapEntry<int, TodoListItem> todoListItemEntry) {
     return TextField(
       readOnly: _todoListItemBeingEdited != todoListItemEntry.value,
+      style: TextStyle(
+          decoration: todoListItemEntry.value.completed
+              ? TextDecoration.lineThrough
+              : null),
       onTap: () {
         setState(() {
           _todoListItemBeingEdited = todoListItemEntry.value;
@@ -167,7 +171,6 @@ class _TodoListAppState extends State<_TodoListApp> {
 
 class AppKeys {
   static Key todoList = LabeledGlobalKey("TodoList");
-  static Key completedTodoList = LabeledGlobalKey("CompletedTodoList");
   static Key createNewTodo = LabeledGlobalKey("CreateNewTodo");
   static Key newTodoText = LabeledGlobalKey("NewTodoText");
   static Key bulkDelete = LabeledGlobalKey("BulkDelete");

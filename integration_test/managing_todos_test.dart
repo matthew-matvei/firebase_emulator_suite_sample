@@ -90,34 +90,30 @@ void main() {
     await tester.completeTodoListItems([firstTodoListItem, secondTodoListItem]);
 
     expect(completedTitle, findsOneWidget);
-    final completed = find.byKey(AppKeys.completedTodoList);
-    expect(completed, findsOneWidget);
+
     expect(
-      find.descendant(of: completed, matching: find.text(firstTodoListItem)),
+      _todoListItemHasStrikethroughApplied(firstTodoListItem),
       findsOneWidget,
     );
+
     expect(
-      find.descendant(of: completed, matching: find.text(secondTodoListItem)),
+      _todoListItemHasStrikethroughApplied(secondTodoListItem),
       findsOneWidget,
     );
+
     expect(
-      find.descendant(
-          of: completed, matching: find.text(incompleteTodoListItem)),
-      findsNothing,
-    );
-    final notCompleted = find.byKey(AppKeys.todoList);
-    expect(notCompleted, findsOneWidget);
-    expect(
-      find.descendant(of: notCompleted, matching: find.text(firstTodoListItem)),
-      findsNothing,
-    );
-    expect(
-      find.descendant(
-          of: notCompleted, matching: find.text(secondTodoListItem)),
+      _todoListItemHasStrikethroughApplied(incompleteTodoListItem),
       findsNothing,
     );
   });
 }
+
+Finder _todoListItemHasStrikethroughApplied(String todoListItem) =>
+    find.ancestor(
+        of: find.text(todoListItem),
+        matching: find.byWidgetPredicate((widget) =>
+            widget is TextField &&
+            widget.style?.decoration == TextDecoration.lineThrough));
 
 extension _TestRunner on WidgetTester {
   Future<void> runApp() async {
