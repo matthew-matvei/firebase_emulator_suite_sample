@@ -1,8 +1,20 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'todo_list_item.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+      options: const FirebaseOptions(
+          apiKey: "any",
+          appId: "firebase_emulator_suite_sample",
+          messagingSenderId: "any",
+          projectId: "demo-firebase-emulator-suite"));
+
+  await FirebaseAuth.instance.useAuthEmulator("localhost", 9099);
+
   runApp(const _TodoListApp());
 }
 
