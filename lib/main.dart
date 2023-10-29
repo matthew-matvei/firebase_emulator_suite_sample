@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'todo_list_item.dart';
+
 void main() {
   runApp(const _TodoListApp());
 }
@@ -13,12 +15,14 @@ class _TodoListApp extends StatefulWidget {
 
 class _TodoListAppState extends State<_TodoListApp> {
   var _creatingNewTodo = false;
-  var _todoListItems = <String>[];
-  String? _todoListItemBeingEdited;
-  final _selectedTodoListItems = <String>{};
+  var _todoListItems = <TodoListItem>[];
+  TodoListItem? _todoListItemBeingEdited;
+  final _selectedTodoListItems = <TodoListItem>{};
 
   @override
   Widget build(BuildContext context) {
+    var completedTodoListItems =
+        _todoListItems.where((item) => item.completed).toList();
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -28,7 +32,7 @@ class _TodoListAppState extends State<_TodoListApp> {
           child: Column(
             children: [
               ButtonBar(
-                children: [_bulkDeleteButton()],
+                children: [_bulkCompleteButton(), _bulkDeleteButton()],
               ),
               Expanded(
                 child: ListView(
@@ -40,6 +44,16 @@ class _TodoListAppState extends State<_TodoListApp> {
                   ],
                 ),
               ),
+              Expanded(
+                child: ListView(
+                  key: AppKeys.completedTodoList,
+                  children: completedTodoListItems
+                      .asMap()
+                      .entries
+                      .map(_toTodoListItemRow)
+                      .toList(),
+                ),
+              )
             ],
           ),
         ),
@@ -48,17 +62,19 @@ class _TodoListAppState extends State<_TodoListApp> {
   }
 
   Iterable<Widget> _listOfTodoItems() {
-    return _todoListItems.asMap().entries.map((entry) => Row(
-          children: [
-            _todoListItemCheckbox(entry.value),
-            Expanded(
-              child: _todoListItem(entry),
-            ),
-          ],
-        ));
+    return _todoListItems.asMap().entries.map(_toTodoListItemRow);
   }
 
-  TextField _todoListItem(MapEntry<int, String> todoListItemEntry) {
+  Widget _toTodoListItemRow(MapEntry<int, TodoListItem> entry) => Row(
+        children: [
+          _todoListItemCheckbox(entry.value),
+          Expanded(
+            child: _todoListItem(entry),
+          ),
+        ],
+      );
+
+  TextField _todoListItem(MapEntry<int, TodoListItem> todoListItemEntry) {
     return TextField(
       readOnly: _todoListItemBeingEdited != todoListItemEntry.value,
       onTap: () {
@@ -66,17 +82,17 @@ class _TodoListAppState extends State<_TodoListApp> {
           _todoListItemBeingEdited = todoListItemEntry.value;
         });
       },
-      onSubmitted: (newTodoListItem) {
+      onSubmitted: (newTodoListItemName) {
         setState(() {
-          _todoListItems[todoListItemEntry.key] = newTodoListItem;
+          _todoListItems[todoListItemEntry.key].name = newTodoListItemName;
           _todoListItemBeingEdited = null;
         });
       },
-      controller: TextEditingController(text: todoListItemEntry.value),
+      controller: TextEditingController(text: todoListItemEntry.value.name),
     );
   }
 
-  Checkbox _todoListItemCheckbox(String todoListItem) {
+  Checkbox _todoListItemCheckbox(TodoListItem todoListItem) {
     return Checkbox(
         value: _selectedTodoListItems.contains(todoListItem),
         onChanged: (selected) {
@@ -106,9 +122,9 @@ class _TodoListAppState extends State<_TodoListApp> {
     return TextField(
       key: AppKeys.newTodoText,
       autofocus: true,
-      onSubmitted: (newTodoText) {
+      onSubmitted: (newTodoListItemName) {
         setState(() {
-          _todoListItems.add(newTodoText);
+          _todoListItems.add(TodoListItem(name: newTodoListItemName));
           _creatingNewTodo = false;
         });
       },
@@ -128,11 +144,28 @@ class _TodoListAppState extends State<_TodoListApp> {
         },
         icon: const Icon(Icons.delete));
   }
+
+  IconButton _bulkCompleteButton() {
+    return IconButton(
+        key: AppKeys.bulkComplete,
+        onPressed: () {
+          setState(() {
+            for (final todoListItem in _todoListItems) {
+              if (_selectedTodoListItems.contains(todoListItem)) {
+                todoListItem.completed = true;
+              }
+            }
+          });
+        },
+        icon: const Icon(Icons.done));
+  }
 }
 
 class AppKeys {
   static Key todoList = LabeledGlobalKey("TodoList");
+  static Key completedTodoList = LabeledGlobalKey("CompletedTodoList");
   static Key createNewTodo = LabeledGlobalKey("CreateNewTodo");
   static Key newTodoText = LabeledGlobalKey("NewTodoText");
   static Key bulkDelete = LabeledGlobalKey("BulkDelete");
+  static Key bulkComplete = LabeledGlobalKey("BulkComplete");
 }

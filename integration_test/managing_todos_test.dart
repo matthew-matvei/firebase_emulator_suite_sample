@@ -72,6 +72,36 @@ void main() {
     expect(find.text(safeTodoListItem), findsOneWidget);
     expect(find.text(secondTodoListItem), findsNothing);
   });
+
+  testWidgets("The user can mark todo list items complete", (tester) async {
+    await tester.runApp();
+
+    const firstTodoListItem = "First to be completed";
+    const incompleteTodoListItem = "Item that won't be completed";
+    const secondTodoListItem = "Second to be completed";
+
+    await tester.createTodoListItem(firstTodoListItem);
+    await tester.createTodoListItem(incompleteTodoListItem);
+    await tester.createTodoListItem(secondTodoListItem);
+
+    await tester.completeTodoListItems([firstTodoListItem, secondTodoListItem]);
+
+    final completed = find.byKey(AppKeys.completedTodoList);
+    expect(completed, findsOneWidget);
+    expect(
+      find.descendant(of: completed, matching: find.text(firstTodoListItem)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: completed, matching: find.text(secondTodoListItem)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+          of: completed, matching: find.text(incompleteTodoListItem)),
+      findsNothing,
+    );
+  });
 }
 
 extension _TestRunner on WidgetTester {
@@ -107,6 +137,20 @@ extension _TestRunner on WidgetTester {
     }
 
     await tap(find.byKey(AppKeys.bulkDelete));
+    await pumpAndSettle();
+  }
+
+  Future<void> completeTodoListItems(List<String> todoListItems) async {
+    for (final todoListItem in todoListItems) {
+      final row = find.ancestor(
+          of: find.text(todoListItem), matching: find.byType(Row));
+      final checkbox =
+          find.descendant(of: row, matching: find.byType(Checkbox));
+      await tap(checkbox);
+      await pumpAndSettle();
+    }
+
+    await tap(find.byKey(AppKeys.bulkComplete));
     await pumpAndSettle();
   }
 }
