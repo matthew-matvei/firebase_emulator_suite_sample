@@ -101,6 +101,17 @@ void main() {
           of: completed, matching: find.text(incompleteTodoListItem)),
       findsNothing,
     );
+    final notCompleted = find.byKey(AppKeys.todoList);
+    expect(notCompleted, findsOneWidget);
+    expect(
+      find.descendant(of: notCompleted, matching: find.text(firstTodoListItem)),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+          of: notCompleted, matching: find.text(secondTodoListItem)),
+      findsNothing,
+    );
   });
 }
 

@@ -21,6 +21,8 @@ class _TodoListAppState extends State<_TodoListApp> {
 
   @override
   Widget build(BuildContext context) {
+    var nonCompletedTodoListItems =
+        _todoListItems.where((item) => !item.completed).toList();
     var completedTodoListItems =
         _todoListItems.where((item) => item.completed).toList();
     return MaterialApp(
@@ -40,7 +42,11 @@ class _TodoListAppState extends State<_TodoListApp> {
                   children: [
                     if (_creatingNewTodo) _newTodoText(),
                     if (!_creatingNewTodo) _createNewTodoButton(),
-                    ..._listOfTodoItems()
+                    ...nonCompletedTodoListItems
+                        .asMap()
+                        .entries
+                        .map(_toTodoListItemRow)
+                        .toList(),
                   ],
                 ),
               ),
@@ -59,10 +65,6 @@ class _TodoListAppState extends State<_TodoListApp> {
         ),
       ),
     );
-  }
-
-  Iterable<Widget> _listOfTodoItems() {
-    return _todoListItems.asMap().entries.map(_toTodoListItemRow);
   }
 
   Widget _toTodoListItemRow(MapEntry<int, TodoListItem> entry) => Row(
