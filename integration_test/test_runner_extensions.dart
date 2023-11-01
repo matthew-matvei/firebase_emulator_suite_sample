@@ -1,14 +1,15 @@
 import 'package:firebase_emulator_suite_sample/main.dart';
+import 'package:firebase_emulator_suite_sample/todo_item_store.dart';
 import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 extension TestRunner on WidgetTester {
-  Future<void> runApp() async {
+  Future<void> runApp({TodoItemStore? store}) async {
     await pumpWidget(
-      const RootRestorationScope(
+      RootRestorationScope(
         restorationId: "Restore from start",
-        child: TodoListApp(),
+        child: TodoListApp(store: store ?? InMemoryTodoItemStore()),
       ),
     );
     await pumpAndSettle();

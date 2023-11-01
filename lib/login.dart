@@ -3,7 +3,9 @@ import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
-  const Login({super.key});
+  final CurrentSession _session;
+  const Login({super.key, required CurrentSession session})
+      : _session = session;
 
   @override
   State<StatefulWidget> createState() => _LoginState();
@@ -40,9 +42,15 @@ class _LoginState extends State<Login> {
               child: ElevatedButton(
                 key: AppKeys.login,
                 onPressed: () {
-                  if (_validUserCredentials().contains(UserCredentials(
-                      userName: _userNameController.text,
-                      password: _passwordController.text))) {
+                  final recognisedUserCredentials = _validUserCredentials()
+                      .where((credentials) =>
+                          credentials.userName == _userNameController.text &&
+                          credentials.password == _passwordController.text)
+                      .firstOrNull;
+
+                  if (recognisedUserCredentials != null) {
+                    widget._session.user = _testUserWithCredentialsMatching(
+                        recognisedUserCredentials);
                     Navigator.of(context).pushReplacementNamed(Routes.todos);
                     return;
                   }
@@ -64,6 +72,13 @@ class _LoginState extends State<Login> {
       ),
     );
   }
+
+  User? _testUserWithCredentialsMatching(
+          UserCredentials recognisedUserCredentials) =>
+      [TestUsers.admin, TestUsers.bob, TestUsers.bobsColleague, TestUsers.jill]
+          .firstWhere((credential) =>
+              recognisedUserCredentials.userName == credential.userName &&
+              recognisedUserCredentials.password == credential.password);
 }
 
 Set<UserCredentials> _validUserCredentials() =>

@@ -1,3 +1,4 @@
+import 'package:firebase_emulator_suite_sample/todo_item_store.dart';
 import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -8,7 +9,8 @@ void main() {
   testWidgets(
     "The user only sees todo items created by their organisation",
     (tester) async {
-      await tester.runApp();
+      final todoItemStore = InMemoryTodoItemStore();
+      await tester.runApp(store: todoItemStore);
 
       const bobTodo = "Bob's organisation's todo list item";
       await tester.createTodoAs(TestUsers.bob, bobTodo);
@@ -82,9 +84,7 @@ void main() {
 
 extension _CreatingTodosAsUser on WidgetTester {
   Future<void> createTodoAs(UserCredentials user, String todo) async {
-    await loginAs(TestUsers.bob);
-
-    var bobTodo = "Bob's organisation's todo list item";
-    await createTodoListItem(bobTodo);
+    await loginAs(user);
+    await createTodoListItem(todo);
   }
 }
