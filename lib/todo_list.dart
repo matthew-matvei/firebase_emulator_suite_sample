@@ -5,14 +5,11 @@ import 'package:flutter/material.dart';
 
 class TodoList extends StatefulWidget {
   final TodoItemStore _store;
-  final CurrentSession _session;
 
-  const TodoList(
-      {super.key,
-      required TodoItemStore store,
-      required CurrentSession session})
-      : _store = store,
-        _session = session;
+  const TodoList({
+    super.key,
+    required TodoItemStore store,
+  }) : _store = store;
 
   @override
   State<StatefulWidget> createState() => _TodoListState();
@@ -161,14 +158,34 @@ class _TodoListState extends State<TodoList> {
     return IconButton(
         key: AppKeys.bulkDelete,
         onPressed: () async {
-          await widget._store
-              .deleteAll(_selectedTodoListItems.map((item) => item.id));
-          setState(() {
-            _todoListItems = _todoListItems
-                .where((element) => !_selectedTodoListItems.contains(element))
-                .toList();
-            _selectedTodoListItems.clear();
-          });
+          try {
+            await widget._store
+                .deleteAll(_selectedTodoListItems.map((item) => item.id));
+            setState(() {
+              _todoListItems = _todoListItems
+                  .where((element) => !_selectedTodoListItems.contains(element))
+                  .toList();
+              _selectedTodoListItems.clear();
+            });
+          } on ArgumentError {
+            if (!context.mounted) {
+              return;
+            }
+
+            await showDialog<void>(
+                context: context,
+                builder: (_) => Dialog(
+                      child: Column(children: [
+                        const Text(
+                            "Sorry, you can only delete your own todo items!"),
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("Close"))
+                      ]),
+                    ));
+          }
         },
         icon: const Icon(Icons.delete));
   }

@@ -32,12 +32,7 @@ class _TodoListAppState extends State<TodoListApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Login(session: widget._session),
-      routes: {
-        Routes.todos: (_) => TodoList(
-              store: widget._store,
-              session: widget._session,
-            )
-      },
+      routes: {Routes.todos: (_) => TodoList(store: widget._store)},
     );
   }
 }

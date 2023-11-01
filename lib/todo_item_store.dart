@@ -28,11 +28,11 @@ class InMemoryTodoItemStore implements TodoItemStore {
 
     if (_inMemoryStore.containsKey(_session.user!.organisation)) {
       _inMemoryStore[_session.user!.organisation]!.add(_StoredTodoListItem(
-          todoListItem,
-          createdBy: _session.user!.userName));
+          item: todoListItem, createdBy: _session.user!.userName));
     } else {
       _inMemoryStore[_session.user!.organisation] = [
-        _StoredTodoListItem(todoListItem, createdBy: _session.user!.userName)
+        _StoredTodoListItem(
+            item: todoListItem, createdBy: _session.user!.userName)
       ];
     }
   }
@@ -64,9 +64,9 @@ class InMemoryTodoItemStore implements TodoItemStore {
       return;
     }
 
-    if (_inMemoryStore[_session.user!.organisation]!.any((item) =>
-        todoItemIds.any((id) => id == item.id) &&
-        item.createdBy != _session.user!.userName)) {
+    if (_inMemoryStore[_session.user!.organisation]!.any((storedItem) =>
+        todoItemIds.any((id) => id == storedItem.item.id) &&
+        storedItem.createdBy != _session.user!.userName)) {
       throw ArgumentError.value(
         todoItemIds,
         "todoItemIds",
@@ -76,14 +76,14 @@ class InMemoryTodoItemStore implements TodoItemStore {
 
     _inMemoryStore[_session.user!.organisation] =
         _inMemoryStore[_session.user!.organisation]!
-            .where((item) => !todoItemIds.any((id) => item.id == id))
+            .where((storedItem) =>
+                !todoItemIds.any((id) => storedItem.item.id == id))
             .toList();
   }
 }
 
-class _StoredTodoListItem extends TodoListItem {
-  final String createdBy;
+class _StoredTodoListItem {
   final TodoListItem item;
-  _StoredTodoListItem(this.item, {required this.createdBy})
-      : super(name: item.name);
+  final String createdBy;
+  _StoredTodoListItem({required this.item, required this.createdBy});
 }
