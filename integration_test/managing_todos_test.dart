@@ -1,7 +1,7 @@
 import 'package:firebase_emulator_suite_sample/main.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'common_finders_extensions.dart';
 import 'test_runner_extensions.dart';
 
 void main() {
@@ -98,25 +98,18 @@ void main() {
     expect(completedTitle, findsOneWidget);
 
     expect(
-      _todoListItemHasStrikethroughApplied(firstTodoListItem),
+      find.completedTodoListItem(firstTodoListItem),
       findsOneWidget,
     );
 
     expect(
-      _todoListItemHasStrikethroughApplied(secondTodoListItem),
+      find.completedTodoListItem(secondTodoListItem),
       findsOneWidget,
     );
 
     expect(
-      _todoListItemHasStrikethroughApplied(incompleteTodoListItem),
+      find.completedTodoListItem(incompleteTodoListItem),
       findsNothing,
     );
   });
 }
-
-Finder _todoListItemHasStrikethroughApplied(String todoListItem) =>
-    find.ancestor(
-        of: find.text(todoListItem),
-        matching: find.byWidgetPredicate((widget) =>
-            widget is TextField &&
-            widget.style?.decoration == TextDecoration.lineThrough));
