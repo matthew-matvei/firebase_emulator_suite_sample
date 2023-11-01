@@ -1,4 +1,5 @@
 import 'package:firebase_emulator_suite_sample/main.dart';
+import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -39,8 +40,9 @@ class _LoginState extends State<Login> {
               child: ElevatedButton(
                 key: AppKeys.login,
                 onPressed: () {
-                  if (_validCredentials().contains(
-                      (_userNameController.text, _passwordController.text))) {
+                  if (_validUserCredentials().contains(UserCredentials(
+                      userName: _userNameController.text,
+                      password: _passwordController.text))) {
                     Navigator.of(context).pushReplacementNamed(Routes.todos);
                     return;
                   }
@@ -64,4 +66,5 @@ class _LoginState extends State<Login> {
   }
 }
 
-List<(String, String)> _validCredentials() => [("admin", "Guest1!")];
+Set<UserCredentials> _validUserCredentials() =>
+    {TestUsers.bob, TestUsers.bobsColleague, TestUsers.jill, TestUsers.admin};

@@ -3,17 +3,17 @@ import 'package:firebase_emulator_suite_sample/todo_list.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const _TodoListApp());
+  runApp(const TodoListApp());
 }
 
-class _TodoListApp extends StatefulWidget {
-  const _TodoListApp();
+class TodoListApp extends StatefulWidget {
+  const TodoListApp({super.key});
 
   @override
-  State<_TodoListApp> createState() => _TodoListAppState();
+  State<TodoListApp> createState() => _TodoListAppState();
 }
 
-class _TodoListAppState extends State<_TodoListApp> {
+class _TodoListAppState extends State<TodoListApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

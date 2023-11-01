@@ -1,11 +1,11 @@
-import 'package:firebase_emulator_suite_sample/main.dart' as app;
 import 'package:firebase_emulator_suite_sample/main.dart';
+import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 extension TestRunner on WidgetTester {
   Future<void> runApp() async {
-    app.main();
+    await pumpWidget(const TodoListApp());
     await pumpAndSettle();
   }
 
@@ -24,6 +24,9 @@ extension TestRunner on WidgetTester {
     await tap(find.byKey(AppKeys.login));
     await pumpAndSettle();
   }
+
+  Future<void> loginAs(UserCredentials user) async =>
+      login(userName: user.userName, password: user.password);
 
   Future<void> createTodoListItem(String name) async {
     await tap(find.byKey(AppKeys.createNewTodo));
