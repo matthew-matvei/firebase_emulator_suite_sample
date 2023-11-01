@@ -76,6 +76,8 @@ void main() {
       const bobsColleagueTodo = "This is Bob's colleague's lovely todo";
       await tester.createTodoAs(TestUsers.bobsColleague, bobsColleagueTodo);
 
+      await tester.completeTodoListItems([bobTodo, bobsColleagueTodo]);
+
       expect(find.completedTodoListItem(bobTodo), findsOneWidget);
       expect(find.completedTodoListItem(bobsColleagueTodo), findsOneWidget);
     },
