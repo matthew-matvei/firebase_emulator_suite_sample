@@ -26,9 +26,7 @@ class _TodoListState extends State<TodoList> {
 
   @override
   void initState() {
-    widget._store
-        .getAll(organisation: widget._session.user!.organisation)
-        .then((retrievedItems) {
+    widget._store.getAll().then((retrievedItems) {
       setState(() {
         _todoListItems = retrievedItems;
       });
@@ -149,9 +147,7 @@ class _TodoListState extends State<TodoList> {
       key: AppKeys.newTodoText,
       autofocus: true,
       onSubmitted: (newTodoListItemName) async {
-        final newTodoListItem = TodoListItem(
-            name: newTodoListItemName,
-            organisation: widget._session.user!.organisation);
+        final newTodoListItem = TodoListItem(name: newTodoListItemName);
         await widget._store.create(newTodoListItem);
         setState(() {
           _todoListItems.add(newTodoListItem);
@@ -164,7 +160,9 @@ class _TodoListState extends State<TodoList> {
   IconButton _bulkDeleteButton() {
     return IconButton(
         key: AppKeys.bulkDelete,
-        onPressed: () {
+        onPressed: () async {
+          await widget._store
+              .deleteAll(_selectedTodoListItems.map((item) => item.id));
           setState(() {
             _todoListItems = _todoListItems
                 .where((element) => !_selectedTodoListItems.contains(element))

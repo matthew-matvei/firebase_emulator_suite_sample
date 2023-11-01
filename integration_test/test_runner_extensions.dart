@@ -5,11 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 extension TestRunner on WidgetTester {
-  Future<void> runApp({TodoItemStore? store}) async {
+  Future<void> runApp({TodoItemStore? store, CurrentSession? session}) async {
+    final currentSession = session ?? CurrentSession();
     await pumpWidget(
       RootRestorationScope(
         restorationId: "Restore from start",
-        child: TodoListApp(store: store ?? InMemoryTodoItemStore()),
+        child: TodoListApp(
+          store: store ?? InMemoryTodoItemStore(session: currentSession),
+          session: currentSession,
+        ),
       ),
     );
     await pumpAndSettle();

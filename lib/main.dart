@@ -6,29 +6,36 @@ import 'package:flutter/material.dart';
 import 'user.dart';
 
 void main() {
-  runApp(TodoListApp(store: InMemoryTodoItemStore()));
+  final currentSession = CurrentSession();
+  runApp(TodoListApp(
+      store: InMemoryTodoItemStore(session: currentSession),
+      session: currentSession));
 }
 
 class TodoListApp extends StatefulWidget {
   final TodoItemStore _store;
+  final CurrentSession _session;
 
-  const TodoListApp({super.key, required TodoItemStore store}) : _store = store;
+  const TodoListApp(
+      {super.key,
+      required TodoItemStore store,
+      required CurrentSession session})
+      : _store = store,
+        _session = session;
 
   @override
   State<TodoListApp> createState() => _TodoListAppState();
 }
 
 class _TodoListAppState extends State<TodoListApp> {
-  final CurrentSession _session = CurrentSession._();
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Login(session: _session),
+      home: Login(session: widget._session),
       routes: {
         Routes.todos: (_) => TodoList(
               store: widget._store,
-              session: _session,
+              session: widget._session,
             )
       },
     );
@@ -53,5 +60,5 @@ class Routes {
 class CurrentSession {
   User? user;
 
-  CurrentSession._();
+  CurrentSession();
 }

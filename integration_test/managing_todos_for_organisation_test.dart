@@ -1,3 +1,4 @@
+import 'package:firebase_emulator_suite_sample/main.dart';
 import 'package:firebase_emulator_suite_sample/todo_item_store.dart';
 import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,8 +10,9 @@ void main() {
   testWidgets(
     "The user only sees todo items created by their organisation",
     (tester) async {
-      final todoItemStore = InMemoryTodoItemStore();
-      await tester.runApp(store: todoItemStore);
+      final session = CurrentSession();
+      final todoItemStore = InMemoryTodoItemStore(session: session);
+      await tester.runApp(store: todoItemStore, session: session);
 
       const bobTodo = "Bob's organisation's todo list item";
       await tester.createTodoAs(TestUsers.bob, bobTodo);
