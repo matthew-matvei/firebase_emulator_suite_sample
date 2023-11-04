@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'common_finders_extensions.dart';
 import 'test_runner_extensions.dart';
+import 'test_user.dart';
 
 void main() {
   testWidgets(

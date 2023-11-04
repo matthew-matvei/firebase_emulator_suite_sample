@@ -1,8 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_emulator_suite_sample/login.dart';
 import 'package:firebase_emulator_suite_sample/todo_item_store.dart';
 import 'package:firebase_emulator_suite_sample/todo_list.dart';
+import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter/material.dart';
 
 Future<void> main() async {

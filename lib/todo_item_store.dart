@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_emulator_suite_sample/main.dart';
 import 'package:firebase_emulator_suite_sample/todo_list_item.dart';
 
@@ -15,18 +16,18 @@ abstract class TodoItemStore {
 
 class InMemoryTodoItemStore implements TodoItemStore {
   final Map<String, List<_StoredTodoListItem>> _inMemoryStore = {};
-  final CurrentSession _session;
 
-  InMemoryTodoItemStore({required CurrentSession session}) : _session = session;
+  InMemoryTodoItemStore();
 
   @override
   Future<void> create(TodoListItem todoListItem) async {
-    if (_session.user == null) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
       throw StateError(
           "Cannot create todo list items without a currently signed-in user");
     }
 
-    if (_inMemoryStore.containsKey(_session.user!.organisation)) {
+    if (_inMemoryStore.containsKey(user!.metadata)) {
       _inMemoryStore[_session.user!.organisation]!.add(_StoredTodoListItem(
           item: todoListItem, createdBy: _session.user!.userName));
     } else {
@@ -39,7 +40,7 @@ class InMemoryTodoItemStore implements TodoItemStore {
 
   @override
   Future<List<TodoListItem>> getAll() async {
-    if (_session.user == null) {
+    if (FirebaseAuth.instance.currentUser == null) {
       throw StateError(
           "Cannot get all todo list items without a currently signed-in user");
     }
@@ -55,7 +56,7 @@ class InMemoryTodoItemStore implements TodoItemStore {
 
   @override
   Future<void> deleteAll(Iterable<String> todoItemIds) async {
-    if (_session.user == null) {
+    if (FirebaseAuth.instance.currentUser == null) {
       throw StateError(
           "Cannot delete todo list items without a currently signed-in user");
     }

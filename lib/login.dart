@@ -3,7 +3,9 @@ import 'package:firebase_emulator_suite_sample/main.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
-  const Login({super.key, required CurrentSession session});
+  final CurrentSession _session;
+  const Login({super.key, required CurrentSession session})
+      : _session = session;
 
   @override
   State<StatefulWidget> createState() => _LoginState();
