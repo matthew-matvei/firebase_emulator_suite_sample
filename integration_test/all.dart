@@ -1,23 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:integration_test/integration_test.dart';
 import 'login_test.dart' as login;
 import 'managing_todos_test.dart' as managing_todos;
 import 'managing_todos_for_organisation_test.dart'
     as managing_todos_for_organisation;
 import 'test_user.dart';
+import 'package:firebase_emulator_suite_sample/main.dart' as app
+    show initialise;
 
 Future<void> main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-      options: const FirebaseOptions(
-          apiKey: "any",
-          appId: "firebase_emulator_suite_sample",
-          messagingSenderId: "any",
-          projectId: "demo-firebase-emulator-suite"));
 
-  FirebaseAuth.instance.useAuthEmulator("localhost", 9099);
+  await app.initialise();
 
   try {
     for (var user in TestUsers.all) {

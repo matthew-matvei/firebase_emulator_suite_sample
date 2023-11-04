@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_emulator_suite_sample/login.dart';
@@ -21,6 +22,19 @@ Future<void> main() async {
   runApp(TodoListApp(
       store: InMemoryTodoItemStore(session: currentSession),
       session: currentSession));
+}
+
+Future<void> initialise() async {
+  await Firebase.initializeApp(
+      options: const FirebaseOptions(
+          apiKey: "any",
+          appId: "firebase_emulator_suite_sample",
+          messagingSenderId: "any",
+          projectId: "demo-firebase-emulator-suite"));
+
+  await FirebaseAuth.instance.useAuthEmulator("localhost", 9099);
+
+  FirebaseFirestore.instance.useFirestoreEmulator("localhost", 8080);
 }
 
 class TodoListApp extends StatefulWidget {
