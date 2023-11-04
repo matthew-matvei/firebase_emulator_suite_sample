@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:integration_test/integration_test.dart';
-
 import 'login_test.dart' as login;
 import 'managing_todos_test.dart' as managing_todos;
+import 'managing_todos_for_organisation_test.dart'
+    as managing_todos_for_organisation;
 
 Future<void> main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -29,4 +30,5 @@ Future<void> main() async {
 
   login.main();
   managing_todos.main();
+  managing_todos_for_organisation.main();
 }

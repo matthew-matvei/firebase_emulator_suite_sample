@@ -1,11 +1,21 @@
-import 'package:firebase_emulator_suite_sample/main.dart' as app;
 import 'package:firebase_emulator_suite_sample/main.dart';
+import 'package:firebase_emulator_suite_sample/todo_item_store.dart';
+import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 extension TestRunner on WidgetTester {
-  Future<void> runApp() async {
-    await app.main();
+  Future<void> runApp({TodoItemStore? store, CurrentSession? session}) async {
+    final currentSession = session ?? CurrentSession();
+    await pumpWidget(
+      RootRestorationScope(
+        restorationId: "Restore from start",
+        child: TodoListApp(
+          store: store ?? InMemoryTodoItemStore(session: currentSession),
+          session: currentSession,
+        ),
+      ),
+    );
     await pumpAndSettle();
   }
 
@@ -24,6 +34,9 @@ extension TestRunner on WidgetTester {
     await tap(find.byKey(AppKeys.login));
     await pumpAndSettle();
   }
+
+  Future<void> loginAs(UserCredentials user) async =>
+      login(userName: user.userName, password: user.password);
 
   Future<void> createTodoListItem(String name) async {
     await tap(find.byKey(AppKeys.createNewTodo));

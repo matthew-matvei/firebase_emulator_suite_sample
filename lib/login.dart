@@ -3,7 +3,7 @@ import 'package:firebase_emulator_suite_sample/main.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
-  const Login({super.key});
+  const Login({super.key, required CurrentSession session});
 
   @override
   State<StatefulWidget> createState() => _LoginState();
@@ -70,5 +70,3 @@ class _LoginState extends State<Login> {
     );
   }
 }
-
-List<(String, String)> _validCredentials() => [("admin", "Guest1!")];

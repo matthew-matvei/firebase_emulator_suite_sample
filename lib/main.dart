@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_emulator_suite_sample/login.dart';
+import 'package:firebase_emulator_suite_sample/todo_item_store.dart';
 import 'package:firebase_emulator_suite_sample/todo_list.dart';
 import 'package:flutter/material.dart';
 
@@ -15,22 +16,33 @@ Future<void> main() async {
 
   await FirebaseAuth.instance.useAuthEmulator("localhost", 9099);
 
-  runApp(const _TodoListApp());
+  final currentSession = CurrentSession();
+  runApp(TodoListApp(
+      store: InMemoryTodoItemStore(session: currentSession),
+      session: currentSession));
 }
 
-class _TodoListApp extends StatefulWidget {
-  const _TodoListApp();
+class TodoListApp extends StatefulWidget {
+  final TodoItemStore _store;
+  final CurrentSession _session;
+
+  const TodoListApp(
+      {super.key,
+      required TodoItemStore store,
+      required CurrentSession session})
+      : _store = store,
+        _session = session;
 
   @override
-  State<_TodoListApp> createState() => _TodoListAppState();
+  State<TodoListApp> createState() => _TodoListAppState();
 }
 
-class _TodoListAppState extends State<_TodoListApp> {
+class _TodoListAppState extends State<TodoListApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const Login(),
-      routes: {Routes.todos: (_) => const TodoList()},
+      home: Login(session: widget._session),
+      routes: {Routes.todos: (_) => TodoList(store: widget._store)},
     );
   }
 }
@@ -48,4 +60,10 @@ class AppKeys {
 
 class Routes {
   static String todos = "Todos";
+}
+
+class CurrentSession {
+  User? user;
+
+  CurrentSession();
 }

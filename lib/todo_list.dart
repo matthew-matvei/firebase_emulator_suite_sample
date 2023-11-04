@@ -1,9 +1,15 @@
 import 'package:firebase_emulator_suite_sample/main.dart';
+import 'package:firebase_emulator_suite_sample/todo_item_store.dart';
 import 'package:firebase_emulator_suite_sample/todo_list_item.dart';
 import 'package:flutter/material.dart';
 
 class TodoList extends StatefulWidget {
-  const TodoList({super.key});
+  final TodoItemStore _store;
+
+  const TodoList({
+    super.key,
+    required TodoItemStore store,
+  }) : _store = store;
 
   @override
   State<StatefulWidget> createState() => _TodoListState();
@@ -14,6 +20,17 @@ class _TodoListState extends State<TodoList> {
   var _todoListItems = <TodoListItem>[];
   TodoListItem? _todoListItemBeingEdited;
   final _selectedTodoListItems = <TodoListItem>{};
+
+  @override
+  void initState() {
+    widget._store.getAll().then((retrievedItems) {
+      setState(() {
+        _todoListItems = retrievedItems;
+      });
+    });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +53,10 @@ class _TodoListState extends State<TodoList> {
               child: ListView(
                 key: AppKeys.todoList,
                 children: [
-                  if (_creatingNewTodo) _newTodoText(),
-                  if (!_creatingNewTodo) _createNewTodoButton(),
+                  if (_creatingNewTodo)
+                    _newTodoText()
+                  else
+                    _createNewTodoButton(),
                   ...nonCompletedTodoListItems
                       .asMap()
                       .entries
@@ -124,9 +143,11 @@ class _TodoListState extends State<TodoList> {
     return TextField(
       key: AppKeys.newTodoText,
       autofocus: true,
-      onSubmitted: (newTodoListItemName) {
+      onSubmitted: (newTodoListItemName) async {
+        final newTodoListItem = TodoListItem(name: newTodoListItemName);
+        await widget._store.create(newTodoListItem);
         setState(() {
-          _todoListItems.add(TodoListItem(name: newTodoListItemName));
+          _todoListItems.add(newTodoListItem);
           _creatingNewTodo = false;
         });
       },
@@ -136,13 +157,35 @@ class _TodoListState extends State<TodoList> {
   IconButton _bulkDeleteButton() {
     return IconButton(
         key: AppKeys.bulkDelete,
-        onPressed: () {
-          setState(() {
-            _todoListItems = _todoListItems
-                .where((element) => !_selectedTodoListItems.contains(element))
-                .toList();
-            _selectedTodoListItems.clear();
-          });
+        onPressed: () async {
+          try {
+            await widget._store
+                .deleteAll(_selectedTodoListItems.map((item) => item.id));
+            setState(() {
+              _todoListItems = _todoListItems
+                  .where((element) => !_selectedTodoListItems.contains(element))
+                  .toList();
+              _selectedTodoListItems.clear();
+            });
+          } on ArgumentError {
+            if (!context.mounted) {
+              return;
+            }
+
+            await showDialog<void>(
+                context: context,
+                builder: (_) => Dialog(
+                      child: Column(children: [
+                        const Text(
+                            "Sorry, you can only delete your own todo items!"),
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("Close"))
+                      ]),
+                    ));
+          }
         },
         icon: const Icon(Icons.delete));
   }
