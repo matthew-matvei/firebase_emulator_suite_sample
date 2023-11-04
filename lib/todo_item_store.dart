@@ -16,8 +16,9 @@ abstract class TodoItemStore {
 
 class InMemoryTodoItemStore implements TodoItemStore {
   final Map<String, List<_StoredTodoListItem>> _inMemoryStore = {};
+  final CurrentSession _session;
 
-  InMemoryTodoItemStore();
+  InMemoryTodoItemStore({required CurrentSession session}) : _session = session;
 
   @override
   Future<void> create(TodoListItem todoListItem) async {
