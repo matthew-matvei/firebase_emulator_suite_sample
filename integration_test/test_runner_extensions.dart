@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:firebase_emulator_suite_sample/main.dart';
 import 'package:firebase_emulator_suite_sample/todo_item_store.dart';
 import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_user.dart';
 
 extension TestRunner on WidgetTester {
   Future<void> runApp({TodoItemStore? store, CurrentSession? session}) async {
@@ -20,19 +24,18 @@ extension TestRunner on WidgetTester {
   }
 
   Future<void> login({String? userName, String? password}) async {
-    const validUserName = "admin@fake.com";
-    const validPassword = "Guest1!";
+    final validUserCredentials = TestUsers.admin;
 
     await enterText(
       find.byKey(AppKeys.userNameText),
-      userName ?? validUserName,
+      userName ?? validUserCredentials.userName,
     );
     await enterText(
       find.byKey(AppKeys.passwordText),
-      password ?? validPassword,
+      password ?? validUserCredentials.password,
     );
     await tap(find.byKey(AppKeys.login));
-    await pumpAndSettle();
+    await _waitUntilGone(find.byKey(AppKeys.login));
   }
 
   Future<void> loginAs(UserCredentials user) async =>
@@ -77,5 +80,19 @@ extension TestRunner on WidgetTester {
       await tap(checkbox);
       await pumpAndSettle();
     }
+  }
+
+  Future<void> _waitUntilGone(Finder finder) async {
+    bool timerDone = false;
+    final timer = Timer(const Duration(seconds: 5), () => timerDone = true);
+    while (timerDone != true) {
+      await pump();
+
+      final gone = !any(finder);
+      if (gone) {
+        timerDone = true;
+      }
+    }
+    timer.cancel();
   }
 }

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:integration_test/integration_test.dart';
 import 'login_test.dart' as login;
@@ -15,10 +16,16 @@ Future<void> main() async {
 
   try {
     for (var user in TestUsers.all) {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final newUser =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: user.userName,
         password: user.password,
       );
+
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(newUser.user!.uid)
+          .set({"organisation": user.organisation});
     }
   } on FirebaseAuthException catch (ex) {
     if (ex.code != "email-already-in-use") {
