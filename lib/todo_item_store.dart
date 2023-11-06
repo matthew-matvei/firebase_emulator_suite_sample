@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_emulator_suite_sample/main.dart';
 import 'package:firebase_emulator_suite_sample/todo_list_item.dart';
 
@@ -13,11 +14,11 @@ abstract class TodoItemStore {
   Future<void> deleteAll(Iterable<String> todoItemIds);
 }
 
-class InMemoryTodoItemStore implements TodoItemStore {
-  final Map<String, List<_StoredTodoListItem>> _inMemoryStore = {};
+class FirestoreTodoItemStore implements TodoItemStore {
   final CurrentSession _session;
 
-  InMemoryTodoItemStore({required CurrentSession session}) : _session = session;
+  FirestoreTodoItemStore({required CurrentSession session})
+      : _session = session;
 
   @override
   Future<void> create(TodoListItem todoListItem) async {
@@ -26,15 +27,23 @@ class InMemoryTodoItemStore implements TodoItemStore {
           "Cannot create todo list items without a currently signed-in user");
     }
 
-    if (_inMemoryStore.containsKey(_session.user!.organisation)) {
-      _inMemoryStore[_session.user!.organisation]!.add(_StoredTodoListItem(
-          item: todoListItem, createdBy: _session.user!.userName));
-    } else {
-      _inMemoryStore[_session.user!.organisation] = [
-        _StoredTodoListItem(
-            item: todoListItem, createdBy: _session.user!.userName)
-      ];
-    }
+    await FirebaseFirestore.instance
+        .collection("todos")
+        .doc(todoListItem.id)
+        .withConverter(
+            fromFirestore: (snapshot, _) => _FirestoreTodoListItem(
+                name: snapshot["name"] as String,
+                createdBy: snapshot["createdBy"] as String,
+                organisation: snapshot["organisation"] as String),
+            toFirestore: (item, _) => {
+                  "name": item.name,
+                  "createdBy": item.createdBy,
+                  "organisation": item.organisation
+                })
+        .set(_FirestoreTodoListItem(
+            name: todoListItem.name,
+            createdBy: _session.user!.userName,
+            organisation: _session.user!.organisation));
   }
 
   @override
@@ -44,13 +53,24 @@ class InMemoryTodoItemStore implements TodoItemStore {
           "Cannot get all todo list items without a currently signed-in user");
     }
 
-    if (_inMemoryStore.containsKey(_session.user!.organisation)) {
-      return _inMemoryStore[_session.user!.organisation]!
-          .map((e) => e.item)
-          .toList();
-    } else {
-      return [];
-    }
+    return await FirebaseFirestore.instance
+        .collection("todos")
+        .where("organisation", isEqualTo: _session.user!.organisation)
+        .withConverter(
+            fromFirestore: (snapshot, _) => _FirestoreTodoListItem(
+                name: snapshot["name"] as String,
+                createdBy: snapshot["createdBy"] as String,
+                organisation: snapshot["organisation"] as String),
+            toFirestore: (item, _) => {
+                  "name": item.name,
+                  "createdBy": item.createdBy,
+                  "organisation": item.organisation
+                })
+        .get()
+        .then((value) => value.docs
+            .map((e) => e.data())
+            .map((e) => TodoListItem(name: e.name))
+            .toList());
   }
 
   @override
@@ -60,30 +80,24 @@ class InMemoryTodoItemStore implements TodoItemStore {
           "Cannot delete todo list items without a currently signed-in user");
     }
 
-    if (!_inMemoryStore.containsKey(_session.user!.organisation)) {
-      return;
+    final batch = FirebaseFirestore.instance.batch();
+
+    for (final itemId in todoItemIds) {
+      final item = FirebaseFirestore.instance.collection("todos").doc(itemId);
+      batch.delete(item);
     }
 
-    if (_inMemoryStore[_session.user!.organisation]!.any((storedItem) =>
-        todoItemIds.any((id) => id == storedItem.item.id) &&
-        storedItem.createdBy != _session.user!.userName)) {
-      throw ArgumentError.value(
-        todoItemIds,
-        "todoItemIds",
-        "Cannot delete todo items created by others",
-      );
-    }
-
-    _inMemoryStore[_session.user!.organisation] =
-        _inMemoryStore[_session.user!.organisation]!
-            .where((storedItem) =>
-                !todoItemIds.any((id) => storedItem.item.id == id))
-            .toList();
+    await batch.commit();
   }
 }
 
-class _StoredTodoListItem {
-  final TodoListItem item;
+class _FirestoreTodoListItem {
+  final String name;
   final String createdBy;
-  _StoredTodoListItem({required this.item, required this.createdBy});
+  final String organisation;
+
+  _FirestoreTodoListItem(
+      {required this.name,
+      required this.createdBy,
+      required this.organisation});
 }

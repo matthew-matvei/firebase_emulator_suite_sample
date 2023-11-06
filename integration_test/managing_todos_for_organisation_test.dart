@@ -11,9 +11,7 @@ void main() {
   testWidgets(
     "The user only sees todo items created by their organisation",
     (tester) async {
-      final session = CurrentSession();
-      final todoItemStore = InMemoryTodoItemStore(session: session);
-      await tester.runApp(store: todoItemStore, session: session);
+      await tester.runApp();
 
       const bobTodo = "Bob's organisation's todo list item";
       await tester.createTodoAs(TestUsers.bob, bobTodo);

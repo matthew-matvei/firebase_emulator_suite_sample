@@ -20,7 +20,7 @@ Future<void> main() async {
 
   final currentSession = CurrentSession();
   runApp(TodoListApp(
-      store: InMemoryTodoItemStore(session: currentSession),
+      store: FirestoreTodoItemStore(session: currentSession),
       session: currentSession));
 }
 
