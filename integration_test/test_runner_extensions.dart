@@ -9,13 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_user.dart';
 
 extension TestRunner on WidgetTester {
-  Future<void> runApp({TodoItemStore? store, CurrentSession? session}) async {
-    final currentSession = session ?? CurrentSession();
+  Future<void> runApp() async {
+    final currentSession = CurrentSession();
     await pumpWidget(
       RootRestorationScope(
         restorationId: "Restore from start",
         child: TodoListApp(
-          store: store ?? InMemoryTodoItemStore(session: currentSession),
+          store: FirestoreTodoItemStore(session: currentSession),
           session: currentSession,
         ),
       ),

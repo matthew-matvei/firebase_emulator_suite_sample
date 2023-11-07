@@ -14,6 +14,30 @@ Future<void> main() async {
 
   await app.initialise();
 
+  await _deleteAllTodos();
+  await _seedTestUsers();
+
+  login.main();
+  managing_todos.main();
+  managing_todos_for_organisation.main();
+}
+
+Future<void> _deleteAllTodos() async {
+  final batch = FirebaseFirestore.instance.batch();
+
+  final todos = await FirebaseFirestore.instance
+      .collection("todos")
+      .get()
+      .then((value) => value.docs);
+
+  for (final todo in todos) {
+    batch.delete(todo.reference);
+  }
+
+  await batch.commit();
+}
+
+Future<void> _seedTestUsers() async {
   try {
     for (var user in TestUsers.all) {
       final newUser =
@@ -32,8 +56,4 @@ Future<void> main() async {
       rethrow;
     }
   }
-
-  login.main();
-  managing_todos.main();
-  managing_todos_for_organisation.main();
 }
