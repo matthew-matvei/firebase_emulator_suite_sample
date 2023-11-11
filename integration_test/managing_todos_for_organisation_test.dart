@@ -1,5 +1,3 @@
-import 'package:firebase_emulator_suite_sample/main.dart';
-import 'package:firebase_emulator_suite_sample/todo_item_store.dart';
 import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:firebase_emulator_suite_sample/main.dart' as app
