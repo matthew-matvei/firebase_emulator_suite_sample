@@ -9,14 +9,8 @@ import 'package:flutter/material.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-      options: const FirebaseOptions(
-          apiKey: "any",
-          appId: "firebase_emulator_suite_sample",
-          messagingSenderId: "any",
-          projectId: "demo-firebase-emulator-suite"));
 
-  await FirebaseAuth.instance.useAuthEmulator("localhost", 9099);
+  await initialise();
 
   final currentSession = CurrentSession();
   runApp(TodoListApp(
