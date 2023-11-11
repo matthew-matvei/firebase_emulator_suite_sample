@@ -7,6 +7,8 @@ abstract class TodoItemStore {
 
   Future<List<TodoListItem>> getAll();
 
+  Future<void> saveAll(Iterable<TodoListItem> todos);
+
   /// Deletes each [TodoListItem] referenced by its ID in [todoItemIds].
   ///
   /// Throws an [ArgumentError] if one of the items referenced by [todoItemIds]
@@ -33,15 +35,18 @@ class FirestoreTodoItemStore implements TodoItemStore {
         .withConverter(
             fromFirestore: (snapshot, _) => _FirestoreTodoListItem(
                 name: snapshot["name"] as String,
+                completed: snapshot["completed"] as bool,
                 createdBy: snapshot["createdBy"] as String,
                 organisation: snapshot["organisation"] as String),
             toFirestore: (item, _) => {
                   "name": item.name,
+                  "completed": item.completed,
                   "createdBy": item.createdBy,
                   "organisation": item.organisation
                 })
         .set(_FirestoreTodoListItem(
             name: todoListItem.name,
+            completed: todoListItem.completed,
             createdBy: _session.user!.userName,
             organisation: _session.user!.organisation));
   }
@@ -59,18 +64,39 @@ class FirestoreTodoItemStore implements TodoItemStore {
         .withConverter(
             fromFirestore: (snapshot, _) => _FirestoreTodoListItem(
                 name: snapshot["name"] as String,
+                completed: snapshot["completed"] as bool,
                 createdBy: snapshot["createdBy"] as String,
                 organisation: snapshot["organisation"] as String),
             toFirestore: (item, _) => {
                   "name": item.name,
+                  "completed": item.completed,
                   "createdBy": item.createdBy,
                   "organisation": item.organisation
                 })
         .get()
-        .then((value) => value.docs
-            .map((e) => e.data())
-            .map((e) => TodoListItem(name: e.name))
-            .toList());
+        .then((value) => value.docs.map((e) {
+              final todo = e.data();
+              return TodoListItem.fromExisting(
+                  id: e.id, name: todo.name, completed: todo.completed);
+            }).toList());
+  }
+
+  @override
+  Future<void> saveAll(Iterable<TodoListItem> todos) async {
+    if (_session.user == null) {
+      throw StateError(
+          "Cannot save todo list items without a currently signed-in user");
+    }
+
+    final batch = FirebaseFirestore.instance.batch();
+
+    for (final todo in todos) {
+      final item = FirebaseFirestore.instance.collection("todos").doc(todo.id);
+
+      batch.set(item, {"completed": todo.completed}, SetOptions(merge: true));
+    }
+
+    await batch.commit();
   }
 
   @override
@@ -93,11 +119,13 @@ class FirestoreTodoItemStore implements TodoItemStore {
 
 class _FirestoreTodoListItem {
   final String name;
+  final bool completed;
   final String createdBy;
   final String organisation;
 
   _FirestoreTodoListItem(
       {required this.name,
+      required this.completed,
       required this.createdBy,
       required this.organisation});
 }

@@ -127,4 +127,29 @@ void main() {
       findsNothing,
     );
   });
+
+  testWidgets(
+      "The user's completed todo list items are still completed at next login",
+      (tester) async {
+    await tester.runApp();
+    await tester.login();
+
+    const todo = "Some todo";
+    await tester.createTodoListItem(todo);
+
+    await tester.completeTodoListItems([todo]);
+
+    expect(
+      find.completedTodoListItem(todo),
+      findsOneWidget,
+    );
+
+    await tester.restartAndRestore();
+    await tester.login();
+
+    expect(
+      find.completedTodoListItem(todo),
+      findsOneWidget,
+    );
+  });
 }

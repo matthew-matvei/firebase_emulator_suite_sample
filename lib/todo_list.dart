@@ -193,13 +193,16 @@ class _TodoListState extends State<TodoList> {
   IconButton _bulkCompleteButton() {
     return IconButton(
         key: AppKeys.bulkComplete,
-        onPressed: () {
-          setState(() {
-            for (final todoListItem in _todoListItems) {
-              if (_selectedTodoListItems.contains(todoListItem)) {
-                todoListItem.completed = true;
-              }
+        onPressed: () async {
+          for (final todoListItem in _todoListItems) {
+            if (_selectedTodoListItems.contains(todoListItem)) {
+              todoListItem.completed = true;
             }
+          }
+
+          await widget._store.saveAll(_selectedTodoListItems);
+
+          setState(() {
             _selectedTodoListItems.clear();
           });
         },
