@@ -11,11 +11,11 @@ void main() async {
 
   setUpAll(() async {
     await app.initialise();
-    await seedTestUsers();
   });
 
   setUp(() async {
-    await deleteAllTodos();
+    await deleteTestData();
+    await seedTestUsers();
   });
 
   testWidgets("The user is first greeted with a login page", (tester) async {

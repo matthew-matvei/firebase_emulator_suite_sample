@@ -14,11 +14,11 @@ void main() {
 
   setUpAll(() async {
     await app.initialise();
-    await seedTestUsers();
   });
 
   setUp(() async {
-    await deleteAllTodos();
+    await deleteTestData();
+    await seedTestUsers();
   });
 
   testWidgets(

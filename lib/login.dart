@@ -52,7 +52,7 @@ class _LoginState extends State<Login> {
 
                     final userInfo = await FirebaseFirestore.instance
                         .collection("users")
-                        .doc(userCredential.user!.uid)
+                        .doc(userCredential.user!.email)
                         .get()
                         .then((value) => value.data());
 

@@ -13,11 +13,11 @@ void main() {
 
   setUpAll(() async {
     await app.initialise();
-    await seedTestUsers();
   });
 
   setUp(() async {
-    await deleteAllTodos();
+    await deleteTestData();
+    await seedTestUsers();
   });
 
   testWidgets("The user sees a list of todo items", (tester) async {

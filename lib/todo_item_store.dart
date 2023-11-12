@@ -113,7 +113,19 @@ class FirestoreTodoItemStore implements TodoItemStore {
       batch.delete(item);
     }
 
-    await batch.commit();
+    try {
+      await batch.commit();
+    } on FirebaseException catch (ex) {
+      if (ex.code == "permission-denied") {
+        throw ArgumentError.value(
+          todoItemIds,
+          "todoItemIds",
+          "Cannot delete todo items created by others",
+        );
+      }
+
+      rethrow;
+    }
   }
 }
 
