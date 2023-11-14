@@ -33,17 +33,9 @@ class FirestoreTodoItemStore implements TodoItemStore {
         .collection("todos")
         .doc(todoListItem.id)
         .withConverter(
-            fromFirestore: (snapshot, _) => _FirestoreTodoListItem(
-                name: snapshot["name"] as String,
-                completed: snapshot["completed"] as bool,
-                createdBy: snapshot["createdBy"] as String,
-                organisation: snapshot["organisation"] as String),
-            toFirestore: (item, _) => {
-                  "name": item.name,
-                  "completed": item.completed,
-                  "createdBy": item.createdBy,
-                  "organisation": item.organisation
-                })
+            fromFirestore: (snapshot, _) =>
+                _FirestoreTodoListItem.fromJson(snapshot.data()!),
+            toFirestore: (item, _) => item.toJson())
         .set(_FirestoreTodoListItem(
             name: todoListItem.name,
             completed: todoListItem.completed,
@@ -62,17 +54,9 @@ class FirestoreTodoItemStore implements TodoItemStore {
         .collection("todos")
         .where("organisation", isEqualTo: _session.user!.organisation)
         .withConverter(
-            fromFirestore: (snapshot, _) => _FirestoreTodoListItem(
-                name: snapshot["name"] as String,
-                completed: snapshot["completed"] as bool,
-                createdBy: snapshot["createdBy"] as String,
-                organisation: snapshot["organisation"] as String),
-            toFirestore: (item, _) => {
-                  "name": item.name,
-                  "completed": item.completed,
-                  "createdBy": item.createdBy,
-                  "organisation": item.organisation
-                })
+            fromFirestore: (snapshot, _) =>
+                _FirestoreTodoListItem.fromJson(snapshot.data()!),
+            toFirestore: (item, _) => item.toJson())
         .get()
         .then((value) => value.docs.map((e) {
               final todo = e.data();
@@ -135,9 +119,22 @@ class _FirestoreTodoListItem {
   final String createdBy;
   final String organisation;
 
-  _FirestoreTodoListItem(
+  const _FirestoreTodoListItem(
       {required this.name,
       required this.completed,
       required this.createdBy,
       required this.organisation});
+
+  _FirestoreTodoListItem.fromJson(Map<String, dynamic> json)
+      : name = json["name"] as String,
+        completed = json["completed"] as bool,
+        createdBy = json["createdBy"] as String,
+        organisation = json["organisation"] as String;
+
+  Map<String, dynamic> toJson() => {
+        "name": name,
+        "completed": completed,
+        "createdBy": createdBy,
+        "organisation": organisation
+      };
 }
