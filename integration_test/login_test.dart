@@ -3,7 +3,7 @@ import 'package:firebase_emulator_suite_sample/main.dart' as app
     show initialise;
 import 'package:integration_test/integration_test.dart';
 
-import 'all.dart';
+import 'test_setup.dart';
 import 'test_runner_extensions.dart';
 
 void main() async {
