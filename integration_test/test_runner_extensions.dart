@@ -10,13 +10,11 @@ import 'test_user.dart';
 
 extension TestRunner on WidgetTester {
   Future<void> runApp() async {
-    final currentSession = CurrentSession();
     await pumpWidget(
       RootRestorationScope(
         restorationId: "Restore from start",
         child: TodoListApp(
-          store: FirestoreTodoItemStore(session: currentSession),
-          session: currentSession,
+          store: FirestoreTodoItemStore(),
         ),
       ),
     );
@@ -69,6 +67,10 @@ extension TestRunner on WidgetTester {
 
     await tap(find.byKey(AppKeys.bulkComplete));
     await pumpAndSettle();
+  }
+
+  Future<void> unCompleteTodoListItems(List<String> todoListItems) async {
+    await completeTodoListItems(todoListItems);
   }
 
   Future<void> _selectTodoListItems(List<String> todoListItems) async {

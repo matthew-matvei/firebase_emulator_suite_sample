@@ -1,13 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:firebase_emulator_suite_sample/main.dart';
-import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
-  final CurrentSession _session;
-  const Login({super.key, required CurrentSession session})
-      : _session = session;
+  const Login({super.key});
 
   @override
   State<StatefulWidget> createState() => _LoginState();
@@ -45,25 +41,9 @@ class _LoginState extends State<Login> {
                 key: AppKeys.login,
                 onPressed: () async {
                   try {
-                    final userCredential = await FirebaseAuth.instance
-                        .signInWithEmailAndPassword(
-                            email: _userNameController.text,
-                            password: _passwordController.text);
-
-                    final userInfo = await FirebaseFirestore.instance
-                        .collection("users")
-                        .doc(userCredential.user!.email)
-                        .get()
-                        .then((value) => value.data());
-
-                    if (userInfo == null) {
-                      throw StateError(
-                          "Failed to find information for user with email ${userCredential.user!.email}");
-                    }
-
-                    widget._session.user = User(
-                        userName: userCredential.user!.email!,
-                        organisation: userInfo['organisation'] as String);
+                    await FirebaseAuth.instance.signInWithEmailAndPassword(
+                        email: _userNameController.text,
+                        password: _passwordController.text);
 
                     if (!context.mounted) {
                       return;

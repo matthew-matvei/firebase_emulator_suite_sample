@@ -196,7 +196,7 @@ class _TodoListState extends State<TodoList> {
         onPressed: () async {
           for (final todoListItem in _todoListItems) {
             if (_selectedTodoListItems.contains(todoListItem)) {
-              todoListItem.completed = true;
+              todoListItem.completed = !todoListItem.completed;
             }
           }
 

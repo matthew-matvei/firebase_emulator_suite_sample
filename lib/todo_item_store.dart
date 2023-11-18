@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_emulator_suite_sample/main.dart';
+import 'package:firebase_auth/firebase_auth.dart' as FbAuth;
 import 'package:firebase_emulator_suite_sample/todo_list_item.dart';
+import 'package:firebase_emulator_suite_sample/user.dart';
 
 abstract class TodoItemStore {
   Future<void> create(TodoListItem todoListItem);
@@ -17,14 +18,20 @@ abstract class TodoItemStore {
 }
 
 class FirestoreTodoItemStore implements TodoItemStore {
-  final CurrentSession _session;
+  User? _currentUser;
+  FbAuth.User? _currentFbUser;
 
-  FirestoreTodoItemStore({required CurrentSession session})
-      : _session = session;
+  FirestoreTodoItemStore() {
+    FbAuth.FirebaseAuth.instance.userChanges().listen((newUser) {
+      _currentUser = null;
+      _currentFbUser = newUser;
+    });
+  }
 
   @override
   Future<void> create(TodoListItem todoListItem) async {
-    if (_session.user == null) {
+    final user = await _resolveCurrentUser();
+    if (user == null) {
       throw StateError(
           "Cannot create todo list items without a currently signed-in user");
     }
@@ -39,20 +46,21 @@ class FirestoreTodoItemStore implements TodoItemStore {
         .set(_FirestoreTodoListItem(
             name: todoListItem.name,
             completed: todoListItem.completed,
-            createdBy: _session.user!.userName,
-            organisation: _session.user!.organisation));
+            createdBy: user.userName,
+            organisation: user.organisation));
   }
 
   @override
   Future<List<TodoListItem>> getAll() async {
-    if (_session.user == null) {
+    final user = await _resolveCurrentUser();
+    if (user == null) {
       throw StateError(
           "Cannot get all todo list items without a currently signed-in user");
     }
 
     return await FirebaseFirestore.instance
         .collection("todos")
-        .where("organisation", isEqualTo: _session.user!.organisation)
+        .where("organisation", isEqualTo: user.organisation)
         .withConverter(
             fromFirestore: (snapshot, _) =>
                 _FirestoreTodoListItem.fromJson(snapshot.data()!),
@@ -67,7 +75,8 @@ class FirestoreTodoItemStore implements TodoItemStore {
 
   @override
   Future<void> saveAll(Iterable<TodoListItem> todos) async {
-    if (_session.user == null) {
+    final user = await _resolveCurrentUser();
+    if (user == null) {
       throw StateError(
           "Cannot save todo list items without a currently signed-in user");
     }
@@ -85,7 +94,8 @@ class FirestoreTodoItemStore implements TodoItemStore {
 
   @override
   Future<void> deleteAll(Iterable<String> todoItemIds) async {
-    if (_session.user == null) {
+    final user = await _resolveCurrentUser();
+    if (user == null) {
       throw StateError(
           "Cannot delete todo list items without a currently signed-in user");
     }
@@ -110,6 +120,37 @@ class FirestoreTodoItemStore implements TodoItemStore {
 
       rethrow;
     }
+  }
+
+  Future<User?> _resolveCurrentUser() async {
+    if (_currentUser != null) {
+      return _currentUser;
+    }
+
+    if (_currentFbUser == null) {
+      return null;
+    }
+
+    final userInfo = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(_currentFbUser!.email)
+        .get()
+        .then((value) => value.data());
+
+    if (userInfo == null) {
+      throw StateError(
+          "Failed to find information for user with email ${_currentFbUser!.email}");
+    }
+
+    if (_currentUser != null) {
+      return _currentUser;
+    }
+
+    _currentUser = User(
+        userName: _currentFbUser!.email!,
+        organisation: userInfo["organisation"] as String);
+
+    return _currentUser;
   }
 }
 

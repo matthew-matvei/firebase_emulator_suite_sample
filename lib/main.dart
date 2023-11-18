@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_emulator_suite_sample/login.dart';
 import 'package:firebase_emulator_suite_sample/todo_item_store.dart';
 import 'package:firebase_emulator_suite_sample/todo_list.dart';
-import 'package:firebase_emulator_suite_sample/user.dart';
 import 'package:flutter/material.dart';
 
 Future<void> main() async {
@@ -12,10 +11,7 @@ Future<void> main() async {
 
   await initialise();
 
-  final currentSession = CurrentSession();
-  runApp(TodoListApp(
-      store: FirestoreTodoItemStore(session: currentSession),
-      session: currentSession));
+  runApp(TodoListApp(store: FirestoreTodoItemStore()));
 }
 
 Future<void> initialise() async {
@@ -33,14 +29,8 @@ Future<void> initialise() async {
 
 class TodoListApp extends StatefulWidget {
   final TodoItemStore _store;
-  final CurrentSession _session;
 
-  const TodoListApp(
-      {super.key,
-      required TodoItemStore store,
-      required CurrentSession session})
-      : _store = store,
-        _session = session;
+  const TodoListApp({super.key, required TodoItemStore store}) : _store = store;
 
   @override
   State<TodoListApp> createState() => _TodoListAppState();
@@ -50,7 +40,7 @@ class _TodoListAppState extends State<TodoListApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Login(session: widget._session),
+      home: const Login(),
       routes: {Routes.todos: (_) => TodoList(store: widget._store)},
     );
   }
@@ -69,10 +59,4 @@ class AppKeys {
 
 class Routes {
   static String todos = "Todos";
-}
-
-class CurrentSession {
-  User? user;
-
-  CurrentSession();
 }
