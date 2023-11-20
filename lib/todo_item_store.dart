@@ -109,8 +109,8 @@ class FirestoreTodoItemStore implements TodoItemStore {
 
     try {
       await batch.commit();
-    } on FirebaseException catch (ex) {
-      if (ex.code == "permission-denied") {
+    } catch (error) {
+      if (error.toString().contains("permission-denied")) {
         throw ArgumentError.value(
           todoItemIds,
           "todoItemIds",
