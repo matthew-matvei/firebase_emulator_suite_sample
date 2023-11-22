@@ -49,6 +49,8 @@ void main() async {
       fail("Expected concurrent actions to fail");
     } on TodoItemModifiedException {
       // We received the expected exception
+    } catch (error) {
+      fail("Expected TodoItemModifiedException, but got error '$error'");
     }
 
     expect(
