@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as FbAuth;
+import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:firebase_emulator_suite_sample/todo_list_item.dart';
 import 'package:firebase_emulator_suite_sample/user.dart';
 
@@ -19,12 +19,10 @@ abstract class TodoItemStore {
 
 class FirestoreTodoItemStore implements TodoItemStore {
   User? _currentUser;
-  FbAuth.User? _currentFbUser;
 
   FirestoreTodoItemStore() {
-    FbAuth.FirebaseAuth.instance.userChanges().listen((newUser) {
+    FirebaseAuth.instance.userChanges().listen((_) {
       _currentUser = null;
-      _currentFbUser = newUser;
     });
   }
 
@@ -130,19 +128,20 @@ class FirestoreTodoItemStore implements TodoItemStore {
       return _currentUser;
     }
 
-    if (_currentFbUser == null) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
       return null;
     }
 
     final userInfo = await FirebaseFirestore.instance
         .collection("users")
-        .doc(_currentFbUser!.email)
+        .doc(user.email)
         .get()
         .then((value) => value.data());
 
     if (userInfo == null) {
       throw StateError(
-          "Failed to find information for user with email ${_currentFbUser!.email}");
+          "Failed to find information for user with email ${user.email}");
     }
 
     if (_currentUser != null) {
@@ -150,7 +149,7 @@ class FirestoreTodoItemStore implements TodoItemStore {
     }
 
     _currentUser = User(
-        userName: _currentFbUser!.email!,
+        userName: user.email!,
         organisation: userInfo["organisation"] as String);
 
     return _currentUser;
