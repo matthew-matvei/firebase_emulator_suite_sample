@@ -100,15 +100,20 @@ class FirestoreTodoItemStore implements TodoItemStore {
           "Cannot delete todo list items without a currently signed-in user");
     }
 
-    final batch = FirebaseFirestore.instance.batch();
-
-    for (final itemId in todoItemIds) {
-      final item = FirebaseFirestore.instance.collection("todos").doc(itemId);
-      batch.delete(item);
-    }
-
     try {
-      await batch.commit();
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        for (final itemId in todoItemIds) {
+          final item =
+              FirebaseFirestore.instance.collection("todos").doc(itemId);
+          final _ = await transaction.get(item);
+        }
+
+        for (final itemId in todoItemIds) {
+          final item =
+              FirebaseFirestore.instance.collection("todos").doc(itemId);
+          transaction.delete(item);
+        }
+      }, maxAttempts: 1);
     } catch (error) {
       if (error.toString().contains("permission-denied")) {
         throw ArgumentError.value(
@@ -116,6 +121,10 @@ class FirestoreTodoItemStore implements TodoItemStore {
           "todoItemIds",
           "Cannot delete todo items created by others",
         );
+      }
+
+      if (error.toString().contains("failed-precondition")) {
+        throw TodoItemModifiedException();
       }
 
       rethrow;
@@ -153,6 +162,8 @@ class FirestoreTodoItemStore implements TodoItemStore {
     return _currentUser;
   }
 }
+
+class TodoItemModifiedException implements Exception {}
 
 class _FirestoreTodoListItem {
   final String name;
