@@ -84,9 +84,11 @@ class FirestoreTodoItemStore implements TodoItemStore {
     final batch = FirebaseFirestore.instance.batch();
 
     for (final todo in todos) {
-      final item = FirebaseFirestore.instance.collection("todos").doc(todo.id);
-
-      batch.set(item, {"completed": todo.completed}, SetOptions(merge: true));
+      batch.set(
+        _todoItemReference(todo.id),
+        {"completed": todo.completed},
+        SetOptions(merge: true),
+      );
     }
 
     await batch.commit();
@@ -103,15 +105,11 @@ class FirestoreTodoItemStore implements TodoItemStore {
     try {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         for (final itemId in todoItemIds) {
-          final item =
-              FirebaseFirestore.instance.collection("todos").doc(itemId);
-          final _ = await transaction.get(item);
+          final _ = await transaction.get(_todoItemReference(itemId));
         }
 
         for (final itemId in todoItemIds) {
-          final item =
-              FirebaseFirestore.instance.collection("todos").doc(itemId);
-          transaction.delete(item);
+          transaction.delete(_todoItemReference(itemId));
         }
       }, maxAttempts: 1);
     } catch (error) {
@@ -130,6 +128,9 @@ class FirestoreTodoItemStore implements TodoItemStore {
       rethrow;
     }
   }
+
+  DocumentReference<Map<String, dynamic>> _todoItemReference(String todoId) =>
+      FirebaseFirestore.instance.collection("todos").doc(todoId);
 
   Future<User?> _resolveCurrentUser() async {
     if (_currentUser != null) {
