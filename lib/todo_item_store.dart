@@ -36,18 +36,12 @@ class FirestoreTodoItemStore implements TodoItemStore {
           "Cannot create todo list items without a currently signed-in user");
     }
 
-    await FirebaseFirestore.instance
-        .collection("todos")
-        .doc(todoListItem.id)
+    await _todoItemReference(todoListItem.id)
         .withConverter(
             fromFirestore: (snapshot, _) =>
                 _FirestoreTodoListItem.fromJson(snapshot.data()!),
             toFirestore: (item, _) => item.toJson())
-        .set(_FirestoreTodoListItem(
-            name: todoListItem.name,
-            completed: todoListItem.completed,
-            createdBy: user.userName,
-            organisation: user.organisation));
+        .set(_FirestoreTodoListItem.createdBy(user, todoListItem));
   }
 
   @override
@@ -58,19 +52,18 @@ class FirestoreTodoItemStore implements TodoItemStore {
           "Cannot get all todo list items without a currently signed-in user");
     }
 
-    return await FirebaseFirestore.instance
+    var todoItemsQuery = await FirebaseFirestore.instance
         .collection("todos")
         .where("organisation", isEqualTo: user.organisation)
         .withConverter(
             fromFirestore: (snapshot, _) =>
                 _FirestoreTodoListItem.fromJson(snapshot.data()!),
             toFirestore: (item, _) => item.toJson())
-        .get()
-        .then((value) => value.docs.map((e) {
-              final todo = e.data();
-              return TodoListItem.fromExisting(
-                  id: e.id, name: todo.name, completed: todo.completed);
-            }).toList());
+        .get();
+
+    return todoItemsQuery.docs
+        .map((item) => item.data().toDomain(item.id))
+        .toList();
   }
 
   @override
@@ -184,10 +177,22 @@ class _FirestoreTodoListItem {
         createdBy = json["createdBy"] as String,
         organisation = json["organisation"] as String;
 
+  _FirestoreTodoListItem.createdBy(User user, TodoListItem item)
+      : name = item.name,
+        completed = item.completed,
+        createdBy = user.userName,
+        organisation = user.organisation;
+
   Map<String, dynamic> toJson() => {
         "name": name,
         "completed": completed,
         "createdBy": createdBy,
         "organisation": organisation
       };
+
+  TodoListItem toDomain(String id) => TodoListItem.fromExisting(
+        id: id,
+        name: name,
+        completed: completed,
+      );
 }
