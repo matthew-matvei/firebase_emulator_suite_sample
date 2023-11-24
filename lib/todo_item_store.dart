@@ -158,6 +158,8 @@ class FirestoreTodoItemStore implements TodoItemStore {
 
 class TodoItemModifiedException implements Exception {}
 
+class TransactionWhileOfflineException implements Exception {}
+
 class _FirestoreTodoListItem {
   final String name;
   final bool completed;

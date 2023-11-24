@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_emulator_suite_sample/todo_item_store.dart';
 import 'package:firebase_emulator_suite_sample/todo_list_item.dart';
@@ -58,6 +59,27 @@ void main() async {
       contains(predicate<TodoListItem>((item) =>
           item.id ==
           todosToBeDeleted.firstWhere((element) => element.id == item.id).id)),
+    );
+  });
+
+  testWidgets("Cannot delete items when offline", (tester) async {
+    final store = FirestoreTodoItemStore();
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: TestUsers.bob.userName, password: TestUsers.bob.password);
+
+    final todoThatCantBeDeleted =
+        TodoListItem(name: "This todo won't be able to be deleted");
+
+    await store.create(todoThatCantBeDeleted);
+
+    FirebaseFirestore.instance.disableNetwork();
+
+    Future<void> deletingTodosWhileOffline() =>
+        store.deleteAll([todoThatCantBeDeleted.id]);
+
+    await expectLater(
+      deletingTodosWhileOffline,
+      throwsA(isA<TransactionWhileOfflineException>()),
     );
   });
 }
