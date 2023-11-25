@@ -23,14 +23,7 @@ void main() async {
       "Deleting a todo while someone else completes it throws a TodoItemModifiedException",
       (tester) async {
     final store = FirestoreTodoItemStore();
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: TestUsers.bob.userName, password: TestUsers.bob.password);
-
-    final todosToBeDeleted =
-        List.generate(100, (_) => TodoListItem(name: "To be deleted"));
-    for (final todo in todosToBeDeleted) {
-      await store.create(todo);
-    }
+    final todosToBeDeleted = await _seedTodos(store);
 
     for (final todo in todosToBeDeleted) {
       todo.completed = true;
@@ -77,4 +70,20 @@ void main() async {
       throwsA(isA<TransactionWhileOfflineException>()),
     );
   }, skip: true);
+}
+
+Future<List<TodoListItem>> _seedTodos(FirestoreTodoItemStore store) async {
+  await FirebaseAuth.instance.signInWithEmailAndPassword(
+    email: TestUsers.bob.userName,
+    password: TestUsers.bob.password,
+  );
+
+  final todosToBeDeleted =
+      List.generate(100, (_) => TodoListItem(name: "To be deleted"));
+
+  for (final todo in todosToBeDeleted) {
+    await store.create(todo);
+  }
+
+  return todosToBeDeleted;
 }
