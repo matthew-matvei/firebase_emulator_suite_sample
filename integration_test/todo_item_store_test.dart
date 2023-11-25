@@ -51,7 +51,9 @@ void main() async {
   testWidgets("Cannot delete items when offline", (tester) async {
     final store = FirestoreTodoItemStore();
     await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: TestUsers.bob.userName, password: TestUsers.bob.password);
+      email: TestUsers.bob.userName,
+      password: TestUsers.bob.password,
+    );
 
     final todoThatCantBeDeleted =
         TodoListItem(name: "This todo won't be able to be deleted");
