@@ -39,23 +39,7 @@ class _LoginState extends State<Login> {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 key: AppKeys.login,
-                onPressed: () async {
-                  try {
-                    await FirebaseAuth.instance.signInWithEmailAndPassword(
-                        email: _userNameController.text,
-                        password: _passwordController.text);
-
-                    if (!context.mounted) {
-                      return;
-                    }
-
-                    Navigator.of(context).pushReplacementNamed(Routes.todos);
-                  } on FirebaseAuthException {
-                    setState(() {
-                      _invalidCredentialsReceived = true;
-                    });
-                  }
-                },
+                onPressed: _tryAuthenticateUser,
                 child: const Text("Submit"),
               ),
             ),
@@ -68,5 +52,22 @@ class _LoginState extends State<Login> {
         ))),
       ),
     );
+  }
+
+  Future<void> _tryAuthenticateUser() async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _userNameController.text, password: _passwordController.text);
+
+      if (!context.mounted) {
+        return;
+      }
+
+      Navigator.of(context).pushReplacementNamed(Routes.todos);
+    } on FirebaseAuthException {
+      setState(() {
+        _invalidCredentialsReceived = true;
+      });
+    }
   }
 }
