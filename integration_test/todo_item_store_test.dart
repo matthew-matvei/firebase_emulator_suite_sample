@@ -42,14 +42,10 @@ void main() async {
 
     final concurrentActions = Future.wait([todoCompletion, todoDeletion]);
 
-    try {
-      await concurrentActions;
-      fail("Expected concurrent actions to fail");
-    } on TodoItemModifiedException {
-      // We received the expected exception
-    } catch (error) {
-      fail("Expected TodoItemModifiedException, but got error '$error'");
-    }
+    await expectLater(
+      concurrentActions,
+      throwsA(isA<TodoItemModifiedException>()),
+    );
 
     expect(
       await store.getAll(),
