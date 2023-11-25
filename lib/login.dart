@@ -41,24 +41,7 @@ class _LoginState extends State<Login> {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 key: AppKeys.login,
-                onPressed: () {
-                  final recognisedUserCredentials = _validUserCredentials()
-                      .where((credentials) =>
-                          credentials.userName == _userNameController.text &&
-                          credentials.password == _passwordController.text)
-                      .firstOrNull;
-
-                  if (recognisedUserCredentials != null) {
-                    widget._session.user = _testUserWithCredentialsMatching(
-                        recognisedUserCredentials);
-                    Navigator.of(context).pushReplacementNamed(Routes.todos);
-                    return;
-                  }
-
-                  setState(() {
-                    _invalidCredentialsReceived = true;
-                  });
-                },
+                onPressed: _tryAuthenticateUser,
                 child: const Text("Submit"),
               ),
             ),
@@ -71,6 +54,25 @@ class _LoginState extends State<Login> {
         ))),
       ),
     );
+  }
+
+  void _tryAuthenticateUser() {
+    final recognisedUserCredentials = _validUserCredentials()
+        .where((credentials) =>
+            credentials.userName == _userNameController.text &&
+            credentials.password == _passwordController.text)
+        .firstOrNull;
+
+    if (recognisedUserCredentials != null) {
+      widget._session.user =
+          _testUserWithCredentialsMatching(recognisedUserCredentials);
+      Navigator.of(context).pushReplacementNamed(Routes.todos);
+      return;
+    }
+
+    setState(() {
+      _invalidCredentialsReceived = true;
+    });
   }
 
   User? _testUserWithCredentialsMatching(
