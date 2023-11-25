@@ -15,11 +15,8 @@ void main() async {
   });
 
   setUp(() async {
-    await seedTestUsers();
-  });
-
-  tearDown(() async {
     await deleteTestData();
+    await seedTestUsers();
   });
 
   testWidgets(
