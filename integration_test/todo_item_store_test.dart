@@ -33,10 +33,10 @@ void main() async {
     final todoDeletion =
         store.deleteAll(todosToBeDeleted.map((item) => item.id));
 
-    final concurrentActions = Future.wait([todoCompletion, todoDeletion]);
+    final deletingWhileCompleting = Future.wait([todoCompletion, todoDeletion]);
 
     await expectLater(
-      concurrentActions,
+      deletingWhileCompleting,
       throwsA(isA<TodoItemModifiedException>()),
     );
 
