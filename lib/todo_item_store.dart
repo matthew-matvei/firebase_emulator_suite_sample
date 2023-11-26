@@ -14,6 +14,9 @@ abstract class TodoItemStore {
   ///
   /// Throws an [ArgumentError] if one of the items referenced by [todoItemIds]
   /// isn't owned by the current user.
+  ///
+  /// Throws an [TodoItemModifiedException] if one of the items is modified
+  /// while trying to delete it.
   Future<void> deleteAll(Iterable<String> todoItemIds);
 }
 
