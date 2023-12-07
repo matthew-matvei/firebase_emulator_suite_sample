@@ -197,7 +197,7 @@ class _TodoListState extends State<TodoList> {
           setState(() {
             for (final todoListItem in _todoListItems) {
               if (_selectedTodoListItems.contains(todoListItem)) {
-                todoListItem.completed = true;
+                todoListItem.completed = !todoListItem.completed;
               }
             }
             _selectedTodoListItems.clear();

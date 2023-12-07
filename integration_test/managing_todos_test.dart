@@ -112,4 +112,28 @@ void main() {
       findsNothing,
     );
   });
+
+  testWidgets("The user can mark todo list items as no longer complete",
+      (tester) async {
+    await tester.runApp();
+    await tester.login();
+
+    const todo = "Todo item to be completed";
+
+    await tester.createTodoListItem(todo);
+
+    final completedTitle = find.text("Completed");
+    expect(completedTitle, findsNothing);
+
+    await tester.completeTodoListItems([todo]);
+
+    expect(completedTitle, findsOneWidget);
+
+    expect(find.completedTodoListItem(todo), findsOneWidget);
+
+    await tester.unCompleteTodoListItems([todo]);
+
+    expect(completedTitle, findsNothing);
+    expect(find.completedTodoListItem(todo), findsNothing);
+  });
 }

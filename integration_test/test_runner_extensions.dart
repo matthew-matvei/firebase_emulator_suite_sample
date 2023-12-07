@@ -68,6 +68,10 @@ extension TestRunner on WidgetTester {
     await pumpAndSettle();
   }
 
+  Future<void> unCompleteTodoListItems(List<String> todoListItems) async {
+    await completeTodoListItems(todoListItems);
+  }
+
   Future<void> _selectTodoListItems(List<String> todoListItems) async {
     for (final todoListItem in todoListItems) {
       final row = find.ancestor(
